@@ -3,11 +3,15 @@ from tensorflow import keras
 import numpy as np
 import warnings
 
+# Notes: What did I change: added an initializer attribute, added the initializer attribute to the weight initialization, adjusted the weight dimension inference for 
+# arguments of the form [batch_size, m, 1], edited the docstring for build & call, adjusted the compute_output_shape function (t.f.Tensor_shape & and [batch size, ..])
+
+# Tested: This layer is tested for forward pass and gradient calculation
 
 # This defines a z_i, for i > 1 layer
 
 class layer_first_z(keras.layers.Layer):
-    def __init__(self, m_1:int, activation="relu", **kwargs):
+    def __init__(self, m_1:int, activation = keras.layers.LeakyReLU(alpha=0.01), weight_initializer=tf.random_uniform_initializer(minval=0., maxval=1.0), **kwargs):
         """This is the first layer on the convex z path, hence it takes x,y arguments
 
         Args:
@@ -15,43 +19,45 @@ class layer_first_z(keras.layers.Layer):
         """
         super().__init__(**kwargs) 
         self.m_1 = m_1
-        self.activation = keras.activations.get(activation) 
+        self.activation = activation
+        self.weight_initializer=weight_initializer
 
     def build(self, input_shape):
         """ We assume that input_shape looks like:
-        (n (x dimension), p (y dimension))
+        ([batch_size, n, 1] (x dimension), [batch_size, m, 1] (y dimension))
         """
+
         # Unpacking the values
-        assert len(input_shape) == 2, "Input_shape dimension is {}".format(len(input_shape)) + "but expected length 2"
-        n, p = input_shape
-        n = n[0]
-        p = p[0]
-        if p != 1: #TODO: Test if this warning is really necessary
-            warnings.warn("y, i.e. the action parameter shape, is not 1, it is {}".format(p))
-
-
+        x_shape, y_shape = input_shape
+        n = x_shape[1]
+        m = y_shape[1]
         # Define the weights 
         self.W_0_y = self.add_weight(
-            shape=[self.m_1,p],
+            initializer=self.weight_initializer,
+            shape=[self.m_1,m],
             name="W_0_y"
         )
 
         self.W_0_yu = self.add_weight(
-            shape=[p,n],
+            initializer=self.weight_initializer,
+            shape=[m,n],
             name="W_0_yu"
         )
 
         self.b_0_y = self.add_weight(
-            shape=[p,1],
+            initializer=self.weight_initializer,
+            shape=[m,1],
             name="b_0_y"
         )
 
         self.W_0_u = self.add_weight(
+            initializer=self.weight_initializer,
             shape=[self.m_1,n],
             name="W_0_u"
         )
 
         self.b_0 = self.add_weight(
+            initializer=self.weight_initializer, 
             shape=[self.m_1,1],
             name="b_0"
         )
@@ -60,21 +66,31 @@ class layer_first_z(keras.layers.Layer):
         super().build(input_shape)
 
     def call(self, input):
-        """Assume the input looks like:
-        (x,y)"""
+        """ Convention for the input :
+            1. Input must be a tuple (x,y)
+            2. x,y are of type tf.tensor
+            3. x,y are of dtype tf.float32
+            4. x has shape: [batch_size, n, 1], i.e. a 3D list of column vectors
+            5. y has shape: [batch_size, m, 1], i.e. a 3D list of column vectors
+
+            Warning: The layer won't check for input correctness, you have to use
+            assert utils.check_model_input(argument), before calling the model with the data
+
+            Returns:
+                tf.tensor of shape [batch_size, m_1(output_shape), 1]
+        """
         # Unpack the input
-        assert len(input) == 2, "Input dimension is {}".format(len(input_shape)) + "but expected length 2"
         x,y  = input
         first_summand = tf.matmul(self.W_0_y, tf.multiply(y, tf.matmul(self.W_0_yu, x) + self.b_0_y))
-        assert first_summand.shape == [self.m_1, 1], "first summand shape is {}".format(first_summand.shape) + " expected it to be {}".format([self.m_1, 1])
+        assert first_summand.shape == [x.shape[0], self.m_1, 1], "first summand shape is {}".format(first_summand.shape) + " expected it to be {}".format([x.shape[0], self.m_1, 1])
         second_summand = tf.matmul(self.W_0_u, x) + self.b_0
-        assert second_summand.shape == [self.m_1, 1], "second summand shape is {}".format(second_summand.shape) + " expected it to be {}".format([self.m_1, 1])
+        assert second_summand.shape == [x.shape[0], self.m_1, 1], "second summand shape is {}".format(second_summand.shape) + " expected it to be {}".format([self.m_1, 1])
         output = first_summand + second_summand 
-        assert output.shape == [self.m_1, 1], "output shape is {}".format(output.shape) + " expected it to be {}".format([self.m_1, 1])
+        assert output.shape == [x.shape[0], self.m_1, 1], "output shape is {}".format(output.shape) + " expected it to be {}".format([self.m_1, 1])
         return self.activation(output)
 
     def compute_output_shape(self, input_shape):
-        return [self.m_1, 1]
+        return tf.TensorShape([input_shape[0][0], self.m_1, 1]) 
 
     def get_config(self):
         base_config = super().get_config()
@@ -93,18 +109,21 @@ if __name__ == "__main__":
 
 
     X_train = (x, y)
+    X_train_batch = (tf.random.uniform([10,3,1]), tf.random.uniform([10,2,1]))
 
-    print("The output is", layer(X_train))
+    output = layer(X_train_batch)
+    print("The output is", output, "of type ", type(output))
 
-    # with tf.GradientTape() as tape:
-    #     Z = layer(X_train)
+    with tf.GradientTape() as tape:
+        output = layer(X_train_batch)
+    
+    theta = layer.trainable_variables
+    
+    gradient = tape.gradient(output, layer.trainable_variables)
+    
+    print(gradient)
 
-    # print("The weights are:", layer.b_0)
-    # print("The gradient is", tape.gradient(Z, layer.b_0))
 
-    # # print("Shape of output", output.shape)
 
-    # # Do a forward pass
 
-    # # Display the variables of the model
-    # # print("The variables of the layer", layer.variables)
+

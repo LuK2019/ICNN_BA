@@ -14,16 +14,12 @@ def logexp1p(x):
     return y
 
 
-def ProjNewtonLogistic(
-    A: "np.ndarray (k,n)", b: "np.ndarray (k,)", factor=1, lam0=None
-):
-    """ minimize_{lam>=0, sum(lam)=1/factor} -(A*1 + b)^T*lam + sum(log(1+exp(A^T*lam)))
+def ProjNewtonLogistic(A: "np.ndarray (k,n)", b: "np.ndarray (k,)", lam0=None):
+    """ minimize_{lam>=0, sum(lam)=1} -(A*1 + b)^T*lam + sum(log(1+exp(A^T*lam)))
     This is the negative of the maximization problem
         Args:
             A: Corresponds to the G Matrix
             b: Corresponds to the h Vector, but is not a column vector, it is a row vector
-            factor: If A & b have been scaled by some factor, we need to solve with a new 
-            constraint sum(lam)=1/factor
             lam0: Is the vector along which we solve the problem
         Returns:
             np.array()
@@ -41,7 +37,7 @@ def ProjNewtonLogistic(
     else:
         lam = lam0.copy()
 
-    for ITERATIONS in range(100):
+    for i in range(100):
         # compute gradient and Hessian of objective
         ATlam = A.T.dot(lam)
         z = 1 / (
@@ -54,7 +50,7 @@ def ProjNewtonLogistic(
         # change of variables
         i = np.argmax(lam)
         y = lam.copy()
-        y[i] = 1 / factor  # y = lam with 1 at 1
+        y[i] = 1  # y = lam with 1 at 1
         e[i] = 0  # e = np.ones with 0 at i => Will be used for sums ofer i != i^-
 
         H_22 = H[1, 1] - 2 * H[1, i] + H[i, i]
@@ -73,7 +69,6 @@ def ProjNewtonLogistic(
         try:
             d[~I] = np.linalg.solve(H0_, -g0[~I])  # Return x s.t. H0_ * x = -g0[~I]
         except:
-            print("Iteration", ITERATIONS)
             print("\n== b", b)
             print("\n=== A\n\n", A)
             print("\n=== H\n\n", H)
@@ -90,10 +85,10 @@ def ProjNewtonLogistic(
             y_n = np.maximum(
                 y + t * d, 0
             )  # Repeat this until we found a valid stepsize
-            y_n[i] = 1 / factor
+            y_n[i] = 1
             # Retransformation: y -> x lam corresponds to x_k
             lam_n = y_n.copy()
-            lam_n[i] = 1 / factor - e.dot(y_n)
+            lam_n[i] = 1.0 - e.dot(y_n)
             if lam_n[i] >= 0:
                 break
             if t < 1e-10:
@@ -108,7 +103,4 @@ def ProjNewtonLogistic(
 if __name__ == "__main__":
     G = np.array([[1.0, 2.0], [5.0, 2.0]])
     h = np.array([3, 2])
-    factor = 0.5
-    G = G * factor
-    h = h * factor
-    print(ProjNewtonLogistic(G, h, factor=factor))
+    print(ProjNewtonLogistic(G, h))

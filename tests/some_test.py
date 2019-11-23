@@ -1,47 +1,25 @@
-import tensorflow as tf
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-theta1 = tf.Variable([3.])
-theta2 = tf.Variable([4.])
+df = pd.read_pickle(r"C:\Users\lukas\Desktop\log_res\01\01_25_k.pkl")
 
+df_no_rand = df[df["greedy"] == 0.0]
 
-def f(w1, w2):
-    x= w1*w2*theta1*theta2
-    return x 
+fig, ax = plt.subplots(2)
+ax[0].plot(df_no_rand["episode"], df_no_rand["final cash balance"])
+ax[0].set_title("final cash balance")
 
-w1 = tf.Variable([-2.])
-w2 = tf.Variable([3.])
+ax[1].plot(df_no_rand["episode"], df_no_rand["deviation of x_1 from optimal x_1"])
+ax[1].set_title("deviation of x_1 from optimal x_1")
 
-with tf.GradientTape() as tape:
-    p = f(w1, w2)
-
-gradients = tape.gradient(p, [theta1, theta2])
-
-
-print(gradients)
+fig.suptitle("Result after 25k without greedy choices episodes")
+plt.show()
 
 
-
-#######
-
-def f(arg):
-    x,y = arg
-    return y[0]**2 + y[1] + x
-
-x = tf.Variable([[3.]], dtype="float64")
-y = tf.Variable([[0.3],[0.7]], dtype="float64")
-with tf.GradientTape() as tape:
-    f_out = f((x,y))
-
-gradient = tape.gradient(f_out, y)
-
-####
-
-from layers.model_ICNN import model_ICNN
-from optimization.bundle_entropy import BundleEntropyMethod
-
-model = model_ICNN([1,1], [1,1,1])
-print("Result of ICNN" , BundleEntropyMethod(model, tf.Variable([[3.],[2.],[1.]], tf.Variable([[0.5]]), del_inactive_constraints=True))
-
-
-matrix = np.array([[43.33294, 85.393],[-58.06778, 108.76018]])
-np.linalg.inv(matrix)
+print(
+    "Standard deviation {} and average {} final balance of the final amout of cash between 10-25k episode".format(
+        np.std(df_no_rand["final cash balance"]),
+        np.mean(df_no_rand["final cash balance"]),
+    )
+)

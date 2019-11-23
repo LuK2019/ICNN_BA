@@ -10,19 +10,19 @@ from .layer_path_u import layer_path_u
 # Note: Changed the docstring, but otherwise fine! Works Forward Pass and Gradient Calculation!
 
 
-class model_ICNN(keras.models.Model):
+class model_ICNN_two(keras.models.Model):
     def __init__(
         self,
         layer_params_u: list,
         layer_params_z: list,
-        activation=keras.layers.LeakyReLU(alpha=0.01),
-        weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.01),
+        activation_func=keras.layers.LeakyReLU(alpha=0.01),
+        weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.4),
         **kwargs
     ):
         """Idea: For each layer the provided list specifies the number of units
         of the respective layer
 
-        3 layer PICNN
+        2 two layer PICNN
 
         This is a float32 model, all inputs need to have this dtype, b.c. all the
         weights are float32
@@ -35,39 +35,27 @@ class model_ICNN(keras.models.Model):
                     layer_params_z[-1]
                 )
             )
-        assert (len(layer_params_u) == 2) & (
-            len(layer_params_z) == 3
-        ), "You used an unspecified number of layers, sofar we only completed the test for three layers which means u_1, u_2, z_1, z_2, z_3"
+        assert (len(layer_params_u) == 1) & (
+            len(layer_params_z) == 2
+        ), "You used an unspecified number of layers, sofar we only completed the test for two layers which means u_1, u_2, z_1, z_2, z_3"
         # Initialize the layers with parameters
         self.u_1_layer = layer_path_u(
             layer_params_u[0],
-            activation=activation,
+            activation=activation_func,
             weight_initializer=weight_initializer,
             name="u_1",
         )
-        self.u_2_layer = layer_path_u(
-            layer_params_u[1],
-            activation=activation,
-            weight_initializer=weight_initializer,
-            name="u_2",
-        )
         self.z_1_layer = layer_first_z(
             layer_params_z[0],
-            activation=activation,
+            activation=activation_func,
             weight_initializer=weight_initializer,
             name="z_1",
         )
         self.z_2_layer = layer_inner_z(
             layer_params_z[1],
-            activation=activation,
+            activation=activation_func,
             weight_initializer=weight_initializer,
             name="z_2",
-        )
-        self.z_3_layer = layer_inner_z(
-            layer_params_z[2],
-            activation=activation,
-            weight_initializer=weight_initializer,
-            name="z_3",
         )
 
     def call(self, input):
@@ -91,16 +79,14 @@ class model_ICNN(keras.models.Model):
 
         # Initialize the graph sequence
         u_1 = self.u_1_layer(x)
-        u_2 = self.u_2_layer(u_1)
         z_1 = self.z_1_layer((x, y))
         z_2 = self.z_2_layer((z_1, u_1, y))
-        z_3 = self.z_3_layer((z_2, u_2, y))
 
-        return z_3
+        return z_2
 
 
 if __name__ == "__main__":
-    model = model_ICNN([1, 1], [1, 1, 1])
+    model = model_ICNN_two([1, 1], [1, 1, 1])
 
     X_train_batch = (tf.random.uniform([10, 3, 1]), tf.random.uniform([10, 2, 1]))
 
