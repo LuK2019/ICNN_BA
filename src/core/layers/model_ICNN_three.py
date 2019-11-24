@@ -10,7 +10,7 @@ from .layer_path_u import layer_path_u
 # Note: Changed the docstring, but otherwise fine! Works Forward Pass and Gradient Calculation!
 
 
-class model_ICNN(keras.models.Model):
+class model_ICNN_three(keras.models.Model):
     def __init__(
         self,
         layer_params_u: list,

@@ -3,13 +3,6 @@ from tensorflow import keras
 import numpy as np
 import warnings
 
-# Notes: What did I change: added an initializer attribute, added the initializer attribute to the weight initialization, adjusted the weight dimension inference for
-# arguments of the form [batch_size, m, 1], edited the docstring for build & call, adjusted the compute_output_shape function (t.f.Tensor_shape & and [batch size, ..])
-
-# Tested: This layer is tested for forward pass and gradient calculation
-
-# This defines a z_i, for i > 1 layer
-
 
 class layer_path_u(keras.layers.Layer):
     def __init__(

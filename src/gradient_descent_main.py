@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from core.layers.model_ICNN import model_ICNN
+from core.layers.model_ICNN_three  import model_ICNN
 from core.optimization.gradient_descent import GradientDescent
 from core.optimization.bundle_entropy import BundleEntropyMethod
 

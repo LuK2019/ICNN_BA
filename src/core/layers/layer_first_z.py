@@ -1,26 +1,26 @@
-import tensorflow as tf 
-from tensorflow import keras 
+import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 import warnings
 
-# Notes: What did I change: added an initializer attribute, added the initializer attribute to the weight initialization, adjusted the weight dimension inference for 
-# arguments of the form [batch_size, m, 1], edited the docstring for build & call, adjusted the compute_output_shape function (t.f.Tensor_shape & and [batch size, ..])
-
-# Tested: This layer is tested for forward pass and gradient calculation
-
-# This defines a z_i, for i > 1 layer
 
 class layer_first_z(keras.layers.Layer):
-    def __init__(self, m_1:int, activation = keras.layers.LeakyReLU(alpha=0.01), weight_initializer=tf.random_uniform_initializer(minval=0., maxval=1.0), **kwargs):
+    def __init__(
+        self,
+        m_1: int,
+        activation=keras.layers.LeakyReLU(alpha=0.01),
+        weight_initializer=tf.random_uniform_initializer(minval=0.0, maxval=1.0),
+        **kwargs
+    ):
         """This is the first layer on the convex z path, hence it takes x,y arguments
 
         Args:
             m_1 = Output dimension of the layer
         """
-        super().__init__(**kwargs) 
+        super().__init__(**kwargs)
         self.m_1 = m_1
         self.activation = activation
-        self.weight_initializer=weight_initializer
+        self.weight_initializer = weight_initializer
 
     def build(self, input_shape):
         """ We assume that input_shape looks like:
@@ -31,35 +31,25 @@ class layer_first_z(keras.layers.Layer):
         x_shape, y_shape = input_shape
         n = x_shape[1]
         m = y_shape[1]
-        # Define the weights 
+        # Define the weights
         self.W_0_y = self.add_weight(
-            initializer=self.weight_initializer,
-            shape=[self.m_1,m],
-            name="W_0_y"
+            initializer=self.weight_initializer, shape=[self.m_1, m], name="W_0_y"
         )
 
         self.W_0_yu = self.add_weight(
-            initializer=self.weight_initializer,
-            shape=[m,n],
-            name="W_0_yu"
+            initializer=self.weight_initializer, shape=[m, n], name="W_0_yu"
         )
 
         self.b_0_y = self.add_weight(
-            initializer=self.weight_initializer,
-            shape=[m,1],
-            name="b_0_y"
+            initializer=self.weight_initializer, shape=[m, 1], name="b_0_y"
         )
 
         self.W_0_u = self.add_weight(
-            initializer=self.weight_initializer,
-            shape=[self.m_1,n],
-            name="W_0_u"
+            initializer=self.weight_initializer, shape=[self.m_1, n], name="W_0_u"
         )
 
         self.b_0 = self.add_weight(
-            initializer=self.weight_initializer, 
-            shape=[self.m_1,1],
-            name="b_0"
+            initializer=self.weight_initializer, shape=[self.m_1, 1], name="b_0"
         )
         # This needs to be the final line, to tell the parent class
         # that the model is build, sets build=True
@@ -80,21 +70,45 @@ class layer_first_z(keras.layers.Layer):
                 tf.tensor of shape [batch_size, m_1(output_shape), 1]
         """
         # Unpack the input
-        x,y  = input
-        first_summand = tf.matmul(self.W_0_y, tf.multiply(y, tf.matmul(self.W_0_yu, x) + self.b_0_y))
-        assert first_summand.shape == [x.shape[0], self.m_1, 1], "first summand shape is {}".format(first_summand.shape) + " expected it to be {}".format([x.shape[0], self.m_1, 1])
+        x, y = input
+        first_summand = tf.matmul(
+            self.W_0_y, tf.multiply(y, tf.matmul(self.W_0_yu, x) + self.b_0_y)
+        )
+        assert first_summand.shape == [
+            x.shape[0],
+            self.m_1,
+            1,
+        ], "first summand shape is {}".format(
+            first_summand.shape
+        ) + " expected it to be {}".format(
+            [x.shape[0], self.m_1, 1]
+        )
         second_summand = tf.matmul(self.W_0_u, x) + self.b_0
-        assert second_summand.shape == [x.shape[0], self.m_1, 1], "second summand shape is {}".format(second_summand.shape) + " expected it to be {}".format([self.m_1, 1])
-        output = first_summand + second_summand 
-        assert output.shape == [x.shape[0], self.m_1, 1], "output shape is {}".format(output.shape) + " expected it to be {}".format([self.m_1, 1])
+        assert second_summand.shape == [
+            x.shape[0],
+            self.m_1,
+            1,
+        ], "second summand shape is {}".format(
+            second_summand.shape
+        ) + " expected it to be {}".format(
+            [self.m_1, 1]
+        )
+        output = first_summand + second_summand
+        assert output.shape == [x.shape[0], self.m_1, 1], "output shape is {}".format(
+            output.shape
+        ) + " expected it to be {}".format([self.m_1, 1])
         return self.activation(output)
 
     def compute_output_shape(self, input_shape):
-        return tf.TensorShape([input_shape[0][0], self.m_1, 1]) 
+        return tf.TensorShape([input_shape[0][0], self.m_1, 1])
 
     def get_config(self):
         base_config = super().get_config()
-        return {**base_config, "m_1": self.m_2, "activation":  keras.activations.serialize(self.activation)}
+        return {
+            **base_config,
+            "m_1": self.m_2,
+            "activation": keras.activations.serialize(self.activation),
+        }
 
 
 if __name__ == "__main__":
@@ -103,27 +117,22 @@ if __name__ == "__main__":
     layer = layer_first_z(100)
 
     # Ensure that the input tensors are floats, i.e. dont forget the point .
-    x = tf.Variable([[1.], [1.], [1.], [1.]])
-    y = tf.Variable([[1.]])
+    x = tf.Variable([[1.0], [1.0], [1.0], [1.0]])
+    y = tf.Variable([[1.0]])
     print(y.shape)
 
-
     X_train = (x, y)
-    X_train_batch = (tf.random.uniform([10,3,1]), tf.random.uniform([10,2,1]))
+    X_train_batch = (tf.random.uniform([10, 3, 1]), tf.random.uniform([10, 2, 1]))
 
     output = layer(X_train_batch)
     print("The output is", output, "of type ", type(output))
 
     with tf.GradientTape() as tape:
         output = layer(X_train_batch)
-    
+
     theta = layer.trainable_variables
-    
+
     gradient = tape.gradient(output, layer.trainable_variables)
-    
+
     print(gradient)
-
-
-
-
 

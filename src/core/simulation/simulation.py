@@ -67,6 +67,7 @@ class simulation:
 
 
         """
+        # Initialize logging data
         self.weight_watcher = pd.DataFrame(
             columns=["episode", "weight0", "weight3", "weight10"]
         )
@@ -77,6 +78,7 @@ class simulation:
                 "deviation of x_1 from optimal x_1",
             ]
         )
+        # Initialize replay_memory
         replay_memory = pd.DataFrame(
             columns=["current_state", "action", "reward", "next_state"]
         )
@@ -141,7 +143,7 @@ class simulation:
                 )
 
                 # Store action
-                if period == 0:
+                if period == 0: #TODO: Adjust for multi period
                     chosen_x1 = transition["next_state"][0, 0]
                     optimal_x1 = validation.optimum_2p_solution(
                         current_state, self.game
@@ -176,7 +178,7 @@ class simulation:
                 # Give the random_minibatch an index from 0,1,...,self.size_minibatches
                 random_minibatch.index = list(np.arange(random_minibatch.shape[0]))
 
-                # We train our network with a loss from the data in a minibatch
+                # The network is trained with the loss from the data in the minibatch
                 for index, transition_batch in random_minibatch.iterrows():
                     # For each transition in our minibatch, we
                     # 1.Determine the optimal action (action_plus) of our target_network at "next_state"
@@ -202,7 +204,6 @@ class simulation:
                         x_arg = tf.convert_to_tensor(x_arg)
                         y_arg = tf.convert_to_tensor(y_arg)
                         argument = (x_arg, y_arg)
-                        argument = argument
                         assert check_model_input(argument)
                         y_m = (
                             transition_batch["reward"]
@@ -227,7 +228,7 @@ class simulation:
                         raise
 
                     print(
-                        "Reward y_m  from period {} to period {} is {}".format(
+                        "y_m  from period {} to period {} is {}".format(
                             transition_batch["current_state"][3],
                             transition_batch["next_state"][3],
                             y_m,
@@ -241,6 +242,7 @@ class simulation:
                 ####################################################
                 ################### TRAINING:START #################
                 ####################################################
+
                 # Prepare data for loss calculation
                 y_target = create_targets(random_minibatch=random_minibatch)
 
@@ -283,16 +285,6 @@ class simulation:
                         )
                     )
 
-                    # self.optimizer.apply_gradients(
-                    #     zip(grads_clipped, self.negQ.trainable_variables)
-                    # )
-
-                    # loss_list.append(loss_value)
-                    # print(
-                    #     "Step: {}, Loss: {}".format(
-                    #         self.optimizer.iterations.numpy(), loss_value
-                    #     )
-                    # )
                     # Apply the restrictions to the weights
                     for variable in self.negQ.variables:
                         if variable.constraint is not None:
@@ -321,7 +313,7 @@ class simulation:
                     plot_function(
                         self.negQ,
                         argument_training[0][0],
-                        GRANULARITY=0.05,
+                        GRANULARITY=0.02,
                         regularized=False,
                     )
 
@@ -341,7 +333,7 @@ class simulation:
                 )
 
                 # Store final cash balance
-                if period == 1:
+                if period == 1: # TODO: Adjust for multi period
                     assert (
                         current_state[3, 0] == 2
                     ), "If we are at period == 1, i.e. the final period, the current_state for the next iteration should be prepped as one of period 2"

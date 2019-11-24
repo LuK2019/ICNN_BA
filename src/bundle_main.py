@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-from core.layers.model_ICNN import model_ICNN
+from core.layers.model_ICNN_three import model_ICNN
 from core.optimization.bundle_entropy import BundleEntropyMethod
 from core.optimization.projected_newton import ProjNewtonLogistic
 import core.optimization.pdipm as pdipm

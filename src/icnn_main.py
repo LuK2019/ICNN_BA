@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from core.layers.model_ICNN import model_ICNN
+from core.layers.model_ICNN_three  import model_ICNN_three 
 from core.layers.model_ICNN_two import model_ICNN_two
 from core.utils.utils import plot_function
 import matplotlib.pyplot as plt
@@ -65,7 +65,7 @@ print(gradient)
 
 ### MODEL WITH 3 LAYERS ###
 
-model3 = model_ICNN([10, 10], [10, 10, 1])
+model3 = model_ICNN_three ([10, 10], [10, 10, 1])
 # x = tf.random.uniform([1, 4, 1], minval=-20, maxval=30)
 # plot_function(model3, x, BEGIN=-10, END=10, GRANULARITY=0.25, regularized=False)
 # plot_function(model3, x, BEGIN=0.1, END=0.99, GRANULARITY=0.025, regularized=True)
