@@ -166,7 +166,7 @@ class simulation:
                     )
 
                 # Execute action and watch environment
-                transition, liquidity_costs = self.game.get_new_state_adjusted(
+                transition, liquidity_costs = self.game.get_new_state(
                     current_state, action
                 )  # TODO: Remove old get_new_state and rename it
                 cumulative_liquidity_costs += liquidity_costs

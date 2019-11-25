@@ -41,7 +41,7 @@ game_three_period = game(
 current_state = np.array([[1.0], [10.0], [1.0], [0.0]])
 action = np.array([[0.005], [0.992]])
 
-game_two_period.get_new_state_adjusted(current_state, action)
+game_two_period.get_new_state(current_state, action)
 
 threshold = 0.001
 action

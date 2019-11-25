@@ -1,7 +1,4 @@
 import numpy as np
-import pprint
-
-pp = pprint.PrettyPrinter(indent=4)
 
 
 def phi(delta_x, alpha):
@@ -37,140 +34,6 @@ class game:
         self.reward_func = reward_func
 
     def get_new_state(
-        self, current_state, action, action_decimals=3, printout: bool = False
-    ) -> dict:
-        """ Return the transition tuple for a given current_state, action
-        Conventions:
-        "current_state": np.ndarray [4,1], [[num_stocks (x)], [amout_cash (y)], [current_price (S)], [num_period (t)]]
-        "action": np.ndarray [2,1]
-
-            Returns: dict 
-            {
-            "current_state": np.ndarray [4,1],
-            "action": np.ndarray [2,1]
-            "reward": float/np.ndarray [1,] TODO: TBD
-            "next_state": np.ndarray [4,1]
-            }
-
-        Args:
-            printout:bool: Decide if you want to printout current choices and their results
-        """
-
-        # Unpack the current_state
-        x, y, S, t = current_state[:, 0]
-        # If necessary, convert action to np.ndarray
-        if not isinstance(action, np.ndarray):
-            action = action.numpy()
-        # Round action to decimal threshold to improve numerical stability
-        action = np.round(action, decimals=action_decimals)
-
-        # Check validity of the actions provided
-        assert (
-            (0 <= action[0][0])
-            & (action[0][0] <= 1)
-            & (0 <= action[1][0])
-            & (action[1][0] <= 1)
-        ), "Invalid action taken, must be within [0,1], action={}".format(action)
-
-        # Check validity of the state
-        assert (
-            y >= 0
-        ), "The current state has a negative cash balance, expected it to be non-negative, current state: {}, action {}".format(
-            current_state, action
-        )
-
-        # Calculate the transition for periods before the final period
-        if t < self.T - 1:
-            num_stocks_to_sell = x * action[0][0]
-            cash_from_selling_stocks = num_stocks_to_sell * S
-
-            amount_cash_to_invest = y * action[1][0]
-
-            # The agent decides on how much change in cash he wants
-            change_in_cash_desired = cash_from_selling_stocks - amount_cash_to_invest
-
-            required_change_in_stocks_for_change_in_cash = (
-                -change_in_cash_desired / S
-            )  # Here we see that the agent does not know about the liquidity effects
-
-            if (change_in_cash_desired > 0) & (
-                required_change_in_stocks_for_change_in_cash > 0
-            ):
-                print(
-                    "LOGICAL ERROR, change_in_cash_desired {} is positive but the required_change_in stocks is positive as well {})".format(
-                        change_in_cash_desired,
-                        required_change_in_stocks_for_change_in_cash,
-                    )
-                )
-
-            next_x = x + required_change_in_stocks_for_change_in_cash
-
-            assert next_x >= 0, "We have negative cash balance! {}".format(next_x)
-            assert (
-                next_x <= x + y / S
-            ), " We did lend money to buy more stocks! {}".format(next_x)
-
-            delta_x = next_x - x
-
-            next_y = y - phi(delta_x, self.alpha) * S
-
-            next_S = S * self.random_generator.generate()
-            next_t = t + 1
-
-            next_state = np.array(
-                [[next_x], [next_y], [next_S], [next_t]], dtype=np.float32
-            )
-
-            change_in_cash = next_y - y
-            if printout:
-                print(
-                    "You bought/sold {} stocks for which you paid/received on average {}, that is {} less than for current price {} and spent in total {}".format(
-                        delta_x,
-                        (next_y - y) / delta_x,
-                        (next_y - y) / delta_x - S,
-                        S,
-                        next_y - y,
-                    )
-                )
-            return_dict = {
-                "current_state": current_state,
-                "action": action,
-                "reward": self.reward_func(change_in_cash),
-                "next_state": next_state,
-            }
-
-        # Calculate transition to the final period, here all stocks have to be liquidated
-        else:  # TODO: Test this
-            if printout:
-                print("Episode ends, hence all cash needs to be liquidated")
-            next_x = 0
-            delta_x = next_x - x
-            next_y = y - phi(delta_x, self.alpha) * S
-            change_in_cash = next_y - y
-            next_S = S * self.random_generator.generate()
-            next_t = t + 1
-            next_state = np.array(
-                [[next_x], [next_y], [next_S], [next_t]], dtype=np.float32
-            )
-            return_dict = {
-                "current_state": current_state,
-                "action": action,
-                "reward": self.reward_func(change_in_cash),
-                "next_state": next_state,
-            }
-
-        # Check validity of the next state
-        assert (
-            return_dict["next_state"][1, 0] >= 0
-        ), "The next state has negative cash balance, expected it to be non negative. Transition: Current state {}, next state {}, action {}".format(
-            return_dict["current_state"],
-            return_dict["next_state"],
-            return_dict["action"],
-        )
-
-        return return_dict
-
-    def get_new_state_adjusted(
         self, current_state, action, action_decimals=3, printout: bool = False
     ) -> dict:
         """ Return the transition tuple for a given current_state, action
@@ -336,8 +199,12 @@ class game:
         # Calculate liquidity costs, i.e. the difference in cash after the trade between the scenarios with and without liquidity costs
         # denote the amount of cash with liquidity costs y_1_L, without liquidity costs y_1:
         # 0 \leq y_1_L - y_1 = (delta_x-phi(delta_x))S_0
-        actual_delta_x = return_dict["next_state"][0, 0] - return_dict["current_state"][0, 0]
-        liquidity_costs = (actual_delta_x-phi(actual_delta_x, self.alpha))*return_dict["current_state"][2,0]
+        actual_delta_x = (
+            return_dict["next_state"][0, 0] - return_dict["current_state"][0, 0]
+        )
+        liquidity_costs = (
+            actual_delta_x - phi(actual_delta_x, self.alpha)
+        ) * return_dict["current_state"][2, 0]
         return (return_dict, liquidity_costs)
 
 
@@ -356,10 +223,3 @@ if __name__ == "__main__":
         random_generator=random_generator,
     )
 
-    pp.pprint(
-        game.get_new_state(
-            np.array([[10.0], [10.0], [1.0], [0]]),
-            np.array([[0.1], [0.9]]),
-            printout=True,
-        )
-    )
