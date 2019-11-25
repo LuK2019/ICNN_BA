@@ -106,7 +106,7 @@ class layer_first_z(keras.layers.Layer):
         base_config = super().get_config()
         return {
             **base_config,
-            "m_1": self.m_2,
+            "m_1": self.m_1,
             "activation": keras.activations.serialize(self.activation),
         }
 

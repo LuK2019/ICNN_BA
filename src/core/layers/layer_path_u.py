@@ -9,7 +9,6 @@ class layer_path_u(keras.layers.Layer):
         self,
         n_1: int,
         activation=keras.layers.LeakyReLU(alpha=0.01),
-        max_val_act=None,
         weight_initializer=tf.random_uniform_initializer(minval=0.0, maxval=1.0),
         **kwargs
     ):
@@ -23,7 +22,6 @@ class layer_path_u(keras.layers.Layer):
         self.n_1 = n_1
         self.activation = activation
         self.weight_initializer = weight_initializer
-        self.max_val_act = max_val_act
 
     def build(self, input_shape):
         """ Assumptions about input shape:
@@ -76,7 +74,7 @@ class layer_path_u(keras.layers.Layer):
         base_config = super().get_config()
         return {
             **base_config,
-            "n_1": self.m_2,
+            "n_1": self.n_1,
             "activation": keras.activations.serialize(self.activation),
         }
 

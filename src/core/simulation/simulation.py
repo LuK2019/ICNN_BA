@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
+import os
 
 from ..optimization.gradient_descent import GradientDescent
 from ..optimization.bundle_entropy import BundleEntropyMethod
@@ -29,6 +29,7 @@ class simulation:
         size_minibatches,
         capacity_replay_memory,
         show_plot_every,
+        LOG_NUM,
         initial_weight_vector=None,
         ITERATIONS=10,
         moving_average_factor=0.01,
@@ -38,6 +39,7 @@ class simulation:
         initial_action_for_optimization=tf.Variable([[0.2], [0.7]], dtype="float32"),
         update_target_frequency=1.0,
         optimizer=tf.keras.optimizers.SGD(learning_rate=0.01),
+        LOG_PATH=r"C:\Users\lukas\OneDrive\Universität\Mathematik\Bachelorarbeit\log_dir",
     ):
         self.negQ = ICNN_model
         self.negQ_target = ICNN_model
@@ -55,6 +57,9 @@ class simulation:
         self.ITERATIONS = ITERATIONS
         self.optimizer = optimizer
         self.show_plot_every = show_plot_every
+        self.LOG_PATH = LOG_PATH
+        self.LOG_NUM = LOG_NUM
+        self.check_point_amount = 3
 
     def run_simulation(self):
         """Conventions for replay_memory:
@@ -67,10 +72,17 @@ class simulation:
 
 
         """
+        # Create logging directory
+        LOG_DIR = os.path.join(self.LOG_PATH, "log_{}".format(self.LOG_NUM))
+        print("The Log of this training session is @:", LOG_DIR)
+        if not os.path.exists(LOG_DIR):
+            os.makedirs(LOG_DIR)
+        else:
+            print("There already exists a logging under {}".format(LOG_DIR))
+            raise
+        checkpoint_counter = 1
         # Initialize logging data
-        self.weight_watcher = pd.DataFrame(
-            columns=["episode", "weight0", "weight3", "weight10"]
-        )
+
         simulation_summary = pd.DataFrame(
             columns=[
                 "episode",
@@ -85,6 +97,14 @@ class simulation:
         # Convenvtion used: some_entry = {"current_state":(1,2,3,4): , "action":np.ndarray([[0.5], [0.5]]), "reward": 4, "next_state": (1,3,5,6)} -> all entries are python/numpy objects NOT tf.Variables/Tensors
 
         for episode in np.arange(self.num_episodes):
+
+            # Model weights are saved periodically
+            if episode % int(self.num_episodes / self.check_point_amount) == 0:
+                print("Weights are saved for the {}. time".format(checkpoint_counter))
+                WEIGHT_DIR = os.path.join(LOG_DIR, "weights")
+                self.negQ.save_weights(WEIGHT_DIR)
+                checkpoint_counter += 1
+
             current_state = np.array(
                 [[self.game.x_0], [self.game.y_0], [self.game.S_0], [0]],
                 dtype=np.float32,
@@ -143,7 +163,7 @@ class simulation:
                 )
 
                 # Store action
-                if period == 0: #TODO: Adjust for multi period
+                if period == 0:  # TODO: Adjust for multi period
                     chosen_x1 = transition["next_state"][0, 0]
                     optimal_x1 = validation.optimum_2p_solution(
                         current_state, self.game
@@ -165,7 +185,6 @@ class simulation:
                 # If replay_memory has more than self.capacity_replay_memory entries, only keep the newest self.capacity_replay_memory entries in replay_memory
                 if replay_memory.shape[0] > self.capacity_replay_memory:
                     replay_memory = replay_memory[-self.capacity_replay_memory :]
-                print("Replay_memory has shape", replay_memory.shape)
 
                 # Sample random_minibatch
                 random_minibatch = replay_memory.sample(
@@ -300,10 +319,7 @@ class simulation:
                         "weight3": [self.negQ.trainable_variables[0][3][0]],
                         "weight10": [self.negQ.trainable_variables[0][10][0]],
                     }
-                    self.weight_watcher = self.weight_watcher.append(
-                        pd.DataFrame(d), ignore_index=True
-                    )
-                    print(self.weight_watcher)
+
                 if (episode % self.show_plot_every == 0) & (episode > 2):
                     print(
                         "At episode {} our current objective (regularized) looks like:".format(
@@ -333,7 +349,7 @@ class simulation:
                 )
 
                 # Store final cash balance
-                if period == 1: # TODO: Adjust for multi period
+                if period == 1:  # TODO: Adjust for multi period
                     assert (
                         current_state[3, 0] == 2
                     ), "If we are at period == 1, i.e. the final period, the current_state for the next iteration should be prepped as one of period 2"
@@ -348,5 +364,6 @@ class simulation:
         # Save the experience:
         self.replay_memory = replay_memory
         self.simulation_summary = simulation_summary
-        self.weight_watcher.to_csv(r"C:\Users\lukas\Desktop\log2.csv")
+        WEIGHT_DIR = os.path.join(LOG_DIR, "weights")
+        self.negQ.save_weights(WEIGHT_DIR)
         # END

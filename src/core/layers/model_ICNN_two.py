@@ -82,6 +82,14 @@ class model_ICNN_two(keras.models.Model):
 
         return z_2
 
+    def get_config(self):
+        base_config = super().get_config()
+        return {
+            **base_config,
+            "layer_params_u": self.layer_params_u,
+            "layer_params_z": self.layer_params_z,
+        }
+
 
 if __name__ == "__main__":
     model = model_ICNN_two([1, 1], [1, 1, 1])

@@ -36,7 +36,9 @@ class game:
         self.T = T
         self.reward_func = reward_func
 
-    def get_new_state(self, current_state, action, printout: bool = False) -> dict:
+    def get_new_state(
+        self, current_state, action, action_decimals=3, printout: bool = False
+    ) -> dict:
         """ Return the transition tuple for a given current_state, action
         Conventions:
         "current_state": np.ndarray [4,1], [[num_stocks (x)], [amout_cash (y)], [current_price (S)], [num_period (t)]]
@@ -56,6 +58,11 @@ class game:
 
         # Unpack the current_state
         x, y, S, t = current_state[:, 0]
+        # If necessary, convert action to np.ndarray
+        if not isinstance(action, np.ndarray):
+            action = action.numpy()
+        # Round action to decimal threshold to improve numerical stability
+        action = np.round(action, decimals=action_decimals)
 
         # Check validity of the actions provided
         assert (
@@ -64,13 +71,18 @@ class game:
             & (0 <= action[1][0])
             & (action[1][0] <= 1)
         ), "Invalid action taken, must be within [0,1], action={}".format(action)
-        if not isinstance(action, np.ndarray):
-            action = action.numpy()
+
+        # Check validity of the state
+        assert (
+            y >= 0
+        ), "The current state has a negative cash balance, expected it to be non-negative, current state: {}, action {}".format(
+            current_state, action
+        )
 
         # Calculate the transition for periods before the final period
         if t < self.T - 1:
             num_stocks_to_sell = x * action[0][0]
-            cash_from_selling_stocks = x * action[0][0] * S
+            cash_from_selling_stocks = num_stocks_to_sell * S
 
             amount_cash_to_invest = y * action[1][0]
 
@@ -119,7 +131,7 @@ class game:
                         next_y - y,
                     )
                 )
-            return {
+            return_dict = {
                 "current_state": current_state,
                 "action": action,
                 "reward": self.reward_func(change_in_cash),
@@ -139,12 +151,23 @@ class game:
             next_state = np.array(
                 [[next_x], [next_y], [next_S], [next_t]], dtype=np.float32
             )
-            return {
+            return_dict = {
                 "current_state": current_state,
                 "action": action,
                 "reward": self.reward_func(change_in_cash),
                 "next_state": next_state,
             }
+
+        # Check validity of the next state
+        assert (
+            return_dict["next_state"][1, 0] >= 0
+        ), "The next state has negative cash balance, expected it to be non negative. Transition: Current state {}, next state {}, action".format(
+            return_dict["current_state"],
+            return_dict["next_state"],
+            return_dict["action"],
+        )
+
+        return return_dict
 
 
 if __name__ == "__main__":

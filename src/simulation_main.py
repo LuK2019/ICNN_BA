@@ -58,7 +58,7 @@ game_three_period = game(
 simulation = simulation(
     ICNN_model=negQ,
     game=game_three_period,
-    num_episodes=10000,
+    num_episodes=1000,
     ITERATIONS=1,
     size_minibatches=1,
     capacity_replay_memory=1,
@@ -66,6 +66,7 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=9999,
+    LOG_NUM=2,
 )
 
 print(
