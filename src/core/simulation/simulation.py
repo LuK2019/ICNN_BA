@@ -4,7 +4,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
 
-from ..optimization.gradient_descent import GradientDescent
 from ..optimization.bundle_entropy import BundleEntropyMethod
 from . import validation
 from ..utils.utils import (
