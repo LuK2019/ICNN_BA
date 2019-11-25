@@ -7,8 +7,6 @@ from .layer_inner_z import layer_inner_z
 from .layer_first_z import layer_first_z
 from .layer_path_u import layer_path_u
 
-# Note: Changed the docstring, but otherwise fine! Works Forward Pass and Gradient Calculation!
-
 
 class model_ICNN_three(keras.models.Model):
     def __init__(

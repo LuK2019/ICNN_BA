@@ -12,12 +12,15 @@ class layer_inner_z(keras.layers.Layer):
         weight_initializer=tf.random_uniform_initializer(minval=0.0, maxval=1.0),
         **kwargs
     ):
-        """This is an inner layer on the convex z path, after the first u_1
+        """This is an inner layer on the convex z path, after the first z_1
         got calculated, i.e. i > 1, z_i
 
-        Args:
+        Args: (for constructor)
             m_2 = Output dimension of the layer, note that the last z
-            layer needs output dimension 1
+            layer needs output dimension 1 to be convex
+            [activation= activation function object from keras.layers; default is leaky ReLU]
+            [weight_initializer= weight initializer from tf. ... initializer]
+
         """
         super().__init__(**kwargs)
         self.m_2 = m_2
@@ -27,6 +30,9 @@ class layer_inner_z(keras.layers.Layer):
     def build(self, input_shape):
         """ We assume that input_shape looks like:
             ([batch_size, m_1, 1], [batch_size, n_1, 1], [batch_size, m, 1]) = (z_1 dimension, u_1 dimension, y_dimension)
+
+        build is executed during the first inference of the model, b.c. only then the input shape 
+        is explicit
         """
         # Unpacking the values
         assert len(input_shape) == 3, (
@@ -91,8 +97,11 @@ class layer_inner_z(keras.layers.Layer):
             5. u_1 has shape: [batch_size, n_1, 1]
             6. y has shape: [batch_size, m, 1]
 
+
+            Args:
+                input = (x,y,y) input tuple following the above conventions
             Returns:
-                tf.tensor of shape [bathc_size, m_2 (output_size), 1]
+                tf.tensor of shape [batch_size, m_2 (output_size), 1]
         """
         # Unpack the input
         assert len(input) == 3, (
@@ -102,12 +111,11 @@ class layer_inner_z(keras.layers.Layer):
         z_1, u_1, y = input
 
         # Start the computation
-        # Clip the negative values, as done in paper
+        # Clip the negative values, as done in the ICNN paper
         make_positive = tf.matmul(self.W_1_zu, u_1) + self.b_1_z
         positive_parameters = tf.where(
             make_positive < 0, tf.zeros_like(make_positive), make_positive
-        )  # TODO: Can one differentiate this? Test a negative case!
-        # assert np.sum(positive_parameters < 0) == 0, "detected {} negative components in W_i_zu*u_1+b_1, there should only be non-negative parameters".format(np.sum(positive_parameters < 0)) + "the faulty parameter is {}".format(positive_parameters) TODO: Error:     NotImplementedError: Cannot convert a symbolic Tensor (model_icnn/layer_inner_z/Less_1:0) to a numpy array.
+        )  
 
         assert (
             positive_parameters.shape == z_1.shape

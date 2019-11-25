@@ -20,6 +20,10 @@ class model_ICNN_two(keras.models.Model):
         """Idea: For each layer the provided list specifies the number of units
         of the respective layer
 
+        Args:
+            layer_params_u: list of how many units the layers in the u_path have
+            layer_parms_z: list of how many units the layers in the z_path have
+            
         2 two layer PICNN
 
         This is a float32 model, all inputs need to have this dtype, b.c. all the

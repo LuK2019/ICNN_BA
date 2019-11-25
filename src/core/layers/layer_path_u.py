@@ -17,6 +17,9 @@ class layer_path_u(keras.layers.Layer):
         Args:
             n_1 = Output dimension of the layer, note that the last z
             layer needs output dimension 1
+            [activation= activation function object from keras.layers; default is leaky ReLU]
+            [weight_initializer= weight initializer from tf. ... initializer]
+
         """
         super().__init__(**kwargs)
         self.n_1 = n_1

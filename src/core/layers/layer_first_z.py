@@ -13,9 +13,11 @@ class layer_first_z(keras.layers.Layer):
         **kwargs
     ):
         """This is the first layer on the convex z path, hence it takes x,y arguments
-
-        Args:
+        
+        Args: (for constructor)
             m_1 = Output dimension of the layer
+            [activation= activation function object from keras.layers; default is leaky ReLU]
+            [weight_initializer= weight initializer from tf. ... initializer]
         """
         super().__init__(**kwargs)
         self.m_1 = m_1
@@ -25,6 +27,9 @@ class layer_first_z(keras.layers.Layer):
     def build(self, input_shape):
         """ We assume that input_shape looks like:
         ([batch_size, n, 1] (x dimension), [batch_size, m, 1] (y dimension))
+
+        build is executed during the first inference of the model, b.c. then the input shape 
+        is explicit
         """
 
         # Unpacking the values
@@ -55,7 +60,7 @@ class layer_first_z(keras.layers.Layer):
         # that the model is build, sets build=True
         super().build(input_shape)
 
-    def call(self, input):
+    def call(self, input: tuple) -> "tf.Tensor":
         """ Convention for the input :
             1. Input must be a tuple (x,y)
             2. x,y are of type tf.tensor
@@ -65,9 +70,11 @@ class layer_first_z(keras.layers.Layer):
 
             Warning: The layer won't check for input correctness, you have to use
             assert utils.check_model_input(argument), before calling the model with the data
-
+            Args:
+                input = (x,y) input tuple following the above conventions
             Returns:
                 tf.tensor of shape [batch_size, m_1(output_shape), 1]
+            
         """
         # Unpack the input
         x, y = input
