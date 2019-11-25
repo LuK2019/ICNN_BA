@@ -5,7 +5,6 @@ from func_timeout import func_timeout, FunctionTimedOut
 
 from . import projected_newton
 from ..utils import utils
-from . import gradient_descent
 from . import pdipm
 
 

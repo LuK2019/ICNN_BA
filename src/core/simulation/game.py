@@ -168,9 +168,7 @@ class game:
             }
 
         # Calculate transition to the final period, here all stocks have to be liquidated
-        else:  # TODO: Test this
-            if printout:
-                print("Episode ends, hence all cash needs to be liquidated")
+        else:
             next_x = 0
             delta_x = next_x - x
             next_y = y - phi(delta_x, self.alpha) * S
