@@ -287,6 +287,15 @@ def FakeEntropyForTest(a, b, c, K):
     )
 
 
+def model_loader(model_raw, PATH_TO_WEIGHTS):
+    argument = (tf.random.uniform(shape=[1,4, 1], minval=0, maxval=1), tf.random.uniform(shape=[1,2, 1], minval=0, maxval=1))
+    # assert check_model_input(argument)
+    out = model_raw(argument)
+    print("This is an old weight:", model_raw.trainable_weights[0])
+    model_raw.load_weights(PATH_TO_WEIGHTS)
+    print("This is the new weight:", model_raw.trainable_variables[0])
+    return model_raw
+    
 if __name__ == "__main__":
     for i in range(100):
         print(

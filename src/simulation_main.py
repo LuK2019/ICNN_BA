@@ -14,17 +14,9 @@ from core.simulation.validation import optimum_2p_solution
 import matplotlib.pyplot as plt
 from core.simulation.simulation import H
 
-# For the 3 layer PICNN case:
-# negQ = model_ICNN_three (
-#     [50, 50],
-#     [50, 50, 1],
-#     activation_func="relu",
-#     weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.5),
-#     name="negQ",
-# )
 
 # Initalize necessary simulation objects:
-random_generator_uniform = random_generator_uniform(0.7, 1.3)
+random_generator_uniform = random_generator_uniform(0.8, 1.8)
 
 # For the 2 layer PICNN case:
 negQ = model_ICNN_two(
@@ -57,8 +49,8 @@ game_three_period = game(
 
 simulation = simulation(
     ICNN_model=negQ,
-    game=game_three_period,
-    num_episodes=1000,
+    game=game_two_period,
+    num_episodes=4,
     ITERATIONS=1,
     size_minibatches=1,
     capacity_replay_memory=1,
@@ -66,7 +58,7 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=9999,
-    LOG_NUM=2,
+    LOG_NUM=777,
 )
 
 print(
@@ -96,20 +88,7 @@ end_simulation = time.time()
 
 print("Simulation took {}".format(end_simulation - start_simulation))
 
-# Inspect the simulation results
-df = simulation.simulation_summary
-print(df)
-
-df.to_pickle(r"C:\Users\lukas\Desktop\01_25_k.pkl")
-
-df.plot(x="episode", y="final cash balance")
-plt.show()
-df.plot(x="episode", y="deviation of x_1 from optimal x_1")
-plt.show()
-
-print(simulation.replay_memory.iloc[:6, :])
-print(simulation.replay_memory.tail())
-
+print("First Weight:", simulation.negQ.trainable_variables[0])
 
 # # test the optimization on a model
 # model = model_ICNN_three([100,200], [200,200,1])

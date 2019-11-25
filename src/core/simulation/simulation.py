@@ -74,20 +74,30 @@ class simulation:
         """
         # Create logging directory
         LOG_DIR = os.path.join(self.LOG_PATH, "log_{}".format(self.LOG_NUM))
+        LOG_DIR_WEIGHTS = os.path.join(LOG_DIR, "WEIGHTS")
+        LOG_DIR_SIMULATION_SUMMARY = os.path.join(LOG_DIR, "SIMULATION_SUMMARY")
         print("The Log of this training session is @:", LOG_DIR)
         if not os.path.exists(LOG_DIR):
             os.makedirs(LOG_DIR)
+            os.makedirs(LOG_DIR_WEIGHTS)
+            os.makedirs(LOG_DIR_SIMULATION_SUMMARY)
         else:
-            print("There already exists a logging under {}".format(LOG_DIR))
-            raise
-        checkpoint_counter = 1
+            raise OSError(
+                "There already exists a logging under {}, change LOG_NUM to a unused logging directory".format(
+                    LOG_DIR
+                )
+            )
         # Initialize logging data
 
         simulation_summary = pd.DataFrame(
             columns=[
                 "episode",
-                "final cash balance",
-                "deviation of x_1 from optimal x_1",
+                "greedy",
+                "agent_choice_of_x1",
+                "optimal_choice_of_x1",
+                "agent_final_cash_balance",
+                "optimal_final_cash_balance",
+                "cumulative_liquidity_costs"
             ]
         )
         # Initialize replay_memory
@@ -95,13 +105,15 @@ class simulation:
             columns=["current_state", "action", "reward", "next_state"]
         )
         # Convenvtion used: some_entry = {"current_state":(1,2,3,4): , "action":np.ndarray([[0.5], [0.5]]), "reward": 4, "next_state": (1,3,5,6)} -> all entries are python/numpy objects NOT tf.Variables/Tensors
-
+        checkpoint_counter = 1
         for episode in np.arange(self.num_episodes):
-
+            # The results of each episode are recorded. At the end of the episode they are appended to the simulation_summary
+            episode_summary = {"greedy": [0]}
+            episode_summary["episode"] = [episode]
             # Model weights are saved periodically
             if episode % int(self.num_episodes / self.check_point_amount) == 0:
                 print("Weights are saved for the {}. time".format(checkpoint_counter))
-                WEIGHT_DIR = os.path.join(LOG_DIR, "weights")
+                WEIGHT_DIR = os.path.join(LOG_DIR_WEIGHTS, "1")
                 self.negQ.save_weights(WEIGHT_DIR)
                 checkpoint_counter += 1
 
@@ -109,7 +121,8 @@ class simulation:
                 [[self.game.x_0], [self.game.y_0], [self.game.S_0], [0]],
                 dtype=np.float32,
             )
-            period_summary = {"episode": [episode], "greedy": [0]}
+            episode_summary["initial_state"] = [current_state]
+            cumulative_liquidity_costs = 0
             for period in np.arange(self.game.T):
                 # Print current status
                 print(
@@ -134,7 +147,7 @@ class simulation:
                         [[np.random.uniform(0.1, 0.9)], [np.random.uniform(0.1, 0.9)]],
                         dtype=np.float32,
                     )
-                    period_summary["greedy"] = [1]
+                    episode_summary["greedy"] = [1]
                     print(
                         "\n",
                         "\n===",
@@ -154,8 +167,8 @@ class simulation:
                     )
 
                 # Execute action and watch environment
-                transition = self.game.get_new_state(current_state, action)
-
+                transition, liquidity_costs = self.game.get_new_state_adjusted(current_state, action) #TODO: Remove old get_new_state and rename it
+                cumulative_liquidity_costs +=liquidity_costs
                 assert (
                     transition["next_state"][3, 0] <= self.game.T
                 ), "We have a period which is larger than {} at transition: {}".format(
@@ -175,9 +188,8 @@ class simulation:
                         ),
                         "\n===",
                     )
-                    period_summary["deviation of x_1 from optimal x_1"] = [
-                        chosen_x1 - optimal_x1
-                    ]
+                    episode_summary["agent_choice_of_x1"] = [chosen_x1]
+                    episode_summary["optimal_choice_of_x1"] = [optimal_x1]
 
                 # Store transition in replay memory
                 replay_memory = replay_memory.append(transition, ignore_index=True)
@@ -353,17 +365,29 @@ class simulation:
                     assert (
                         current_state[3, 0] == 2
                     ), "If we are at period == 1, i.e. the final period, the current_state for the next iteration should be prepped as one of period 2"
-                    period_summary["final cash balance"] = [
+                    episode_summary["agent_final_cash_balance"] = [
                         transition["next_state"][1, 0]
                     ]
-                    period_summary = pd.DataFrame(period_summary)
+                    # Calculate final cash balance for the optimal x1 choice
+                    optimal_final_cash_balance = validation.optimal_final_cash_balance_calc(
+                        episode_summary["initial_state"][0],
+                        transition["current_state"],
+                        episode_summary["optimal_choice_of_x1"][0],
+                        self.game,
+                    )
+                    episode_summary["optimal_final_cash_balance"] = [
+                        optimal_final_cash_balance
+                    ]
+                    episode_summary["cumulative_liquidity_costs"]=[cumulative_liquidity_costs]
+                    episode_summary = pd.DataFrame(episode_summary)
                     simulation_summary = simulation_summary.append(
-                        period_summary, ignore_index=True
+                        episode_summary, ignore_index=True
                     )
         # Training has finished:
-        # Save the experience:
+        # Save the experience
         self.replay_memory = replay_memory
         self.simulation_summary = simulation_summary
-        WEIGHT_DIR = os.path.join(LOG_DIR, "weights")
+        simulation_summary.to_pickle(os.path.join(LOG_DIR_SIMULATION_SUMMARY,"simulation_summary_log_{}.pkl".format(self.LOG_NUM)))
+        WEIGHT_DIR = os.path.join(LOG_DIR_WEIGHTS, "1")
         self.negQ.save_weights(WEIGHT_DIR)
         # END
