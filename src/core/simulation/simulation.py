@@ -97,7 +97,7 @@ class simulation:
                 "optimal_choice_of_x1",
                 "agent_final_cash_balance",
                 "optimal_final_cash_balance",
-                "cumulative_liquidity_costs"
+                "cumulative_liquidity_costs",
             ]
         )
         # Initialize replay_memory
@@ -167,8 +167,10 @@ class simulation:
                     )
 
                 # Execute action and watch environment
-                transition, liquidity_costs = self.game.get_new_state_adjusted(current_state, action) #TODO: Remove old get_new_state and rename it
-                cumulative_liquidity_costs +=liquidity_costs
+                transition, liquidity_costs = self.game.get_new_state_adjusted(
+                    current_state, action
+                )  # TODO: Remove old get_new_state and rename it
+                cumulative_liquidity_costs += liquidity_costs
                 assert (
                     transition["next_state"][3, 0] <= self.game.T
                 ), "We have a period which is larger than {} at transition: {}".format(
@@ -378,7 +380,9 @@ class simulation:
                     episode_summary["optimal_final_cash_balance"] = [
                         optimal_final_cash_balance
                     ]
-                    episode_summary["cumulative_liquidity_costs"]=[cumulative_liquidity_costs]
+                    episode_summary["cumulative_liquidity_costs"] = [
+                        cumulative_liquidity_costs
+                    ]
                     episode_summary = pd.DataFrame(episode_summary)
                     simulation_summary = simulation_summary.append(
                         episode_summary, ignore_index=True
@@ -387,7 +391,12 @@ class simulation:
         # Save the experience
         self.replay_memory = replay_memory
         self.simulation_summary = simulation_summary
-        simulation_summary.to_pickle(os.path.join(LOG_DIR_SIMULATION_SUMMARY,"simulation_summary_log_{}.pkl".format(self.LOG_NUM)))
+        simulation_summary.to_pickle(
+            os.path.join(
+                LOG_DIR_SIMULATION_SUMMARY,
+                "simulation_summary_log_{}.pkl".format(self.LOG_NUM),
+            )
+        )
         WEIGHT_DIR = os.path.join(LOG_DIR_WEIGHTS, "1")
         self.negQ.save_weights(WEIGHT_DIR)
         # END
