@@ -16,7 +16,7 @@ from core.simulation.simulation import H
 
 
 # Initalize necessary simulation objects:
-random_generator_uniform = random_generator_uniform(0.8, 1.8)
+random_generator_uniform = random_generator_uniform(0.5, 1.5)
 
 # For the 2 layer PICNN case:
 negQ = model_ICNN_two(
@@ -27,7 +27,7 @@ negQ = model_ICNN_two(
 )
 
 game_two_period = game(
-    x_0=1.0,
+    x_0=5.0,
     y_0=10.0,
     S_0=1.0,
     T=2,
@@ -50,7 +50,7 @@ game_three_period = game(
 simulation = simulation(
     ICNN_model=negQ,
     game=game_two_period,
-    num_episodes=4,
+    num_episodes=1000,
     ITERATIONS=1,
     size_minibatches=1,
     capacity_replay_memory=1,
@@ -58,7 +58,7 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=9999,
-    LOG_NUM=777,
+    LOG_NUM=1000,
 )
 
 print(
