@@ -33,7 +33,7 @@ def BundleEntropyMethod(
         solver: The solver you want to use    
 
     Returns:
-        np.array of the same shape of y
+        np.ndarray of the same shape of y
     """
     duplicate_counter = 0
     # Initialize the lists
@@ -45,12 +45,6 @@ def BundleEntropyMethod(
 
     for k in np.arange(K):
         test_arg = (x, tf.reshape(y, [1, 2, 1]))
-        # print(
-        #     "This is iteration",
-        #     k + 1,
-        #     "with current func val (not regularized) ",
-        #     f(test_arg)[0, 0, 0],
-        # )
 
         # Calculate the gradient w.r.t to y, ensuring that it is a tf.tensor
         if isinstance(y, np.ndarray) or isinstance(y, tf.Tensor):
@@ -114,7 +108,6 @@ def BundleEntropyMethod(
         if k > 0:
             G_unique = np.unique(G, axis=0)
             if G_unique.shape != G.shape:
-                # print("G has duplicated rows, at step {}".format(k))
                 duplicate_counter += 1
                 if duplicate_counter > K * 0.5:
                     if show_plot:
@@ -127,7 +120,6 @@ def BundleEntropyMethod(
                             f, x, optimum_arg=y, BEGIN=0.01, END=0.99, GRANULARITY=0.02
                         )
 
-                    # print("Before or after break? 2")
                     y = tf.reshape(y, [2, 1])
                     y = y.numpy()
                     return y
@@ -149,27 +141,6 @@ def BundleEntropyMethod(
             except:
                 print("Solver did not work. G: {}, h: {}".format(G, h))
                 break
-            # except:
-            #     try:
-            #         if not isinstance(x, np.ndarray):
-            #             x = x.numpy().reshape((4, 1))
-            #         if not isinstance(y, np.ndarray):
-            #             y = y.numpy().reshape((2, 1))
-            #             out = gradient_descent.GradientDescent(
-            #                 f, x, y, K * 2, show_function=False
-            #             )
-            #             assert isinstance(
-            #                 out, np.ndarray
-            #             ), "BundleEntropyMethod is supposed to return np.ndarray, you returned {}".format(
-            #                 type(out)
-            #             )
-            #             return out
-            #     except:
-            #         print("y:", y)
-            #         print("G", G)
-            #         print("lam", lam)
-            #         print("x", x)
-            #         raise
 
         # Convert lam to a column vector for the calculations below
 
@@ -181,7 +152,7 @@ def BundleEntropyMethod(
         y_np = 1 / (1 + np.exp(np.dot(np.transpose(G), lam)))  # Now y is a np.ndarray
         y = tf.Variable([y_np], dtype="float32")  # Now y is a tf.Variable
 
-        # Delete inactive constraints TODO: Why do we need to do this?
+        # Delete inactive constraints
         G_l = [G_l[i] for i in np.arange(len(G_l)) if lam[i] > 0]
         h_l = [h_l[i] for i in np.arange(len(h_l)) if lam[i] > 0]
 
