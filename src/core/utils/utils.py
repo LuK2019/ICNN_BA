@@ -195,13 +195,26 @@ def CreateArguments(random_minibatch):
 def PlotFunction(
     f, x, optimum_arg=None, BEGIN=0.01, END=0.99, GRANULARITY=0.05, regularized=False
 ):
+    """ Plot the second argument surface of a PICNN for fixed first argument x.
+    Args:
+        f: PICNN 
+        x: np.ndarray of shape [1,4,1]
+        [optimum_arg: If not None, plot a point in the picture at (f(optimum_arg), optimum_arg), optimum
+        arg is tf.Variable of shape [1,2,1]]
+        [BEGIN,END: The edges of the inverval to plot]
+        [GRANULARITY: The resolution of the meshgrid]
+        [regularized: If True, plot a HBarrier regularized version of the network]
+    Returns: 
+        None
+        Opens the matplotlib interface with the plot 
+    """
     X = np.arange(BEGIN, END, GRANULARITY)
     Y = np.arange(BEGIN, END, GRANULARITY)
     XM, YM = np.meshgrid(X, Y)
     output = XM.copy()
     for i in np.arange(int((END - BEGIN) / GRANULARITY)):
         for j in np.arange(int((END - BEGIN) / GRANULARITY)):
-            print("i,j", (i, j))
+            print("i,j", (i, j), "=", [[XM[i, j]], [YM[i, j]]])
             y = tf.Variable([[XM[i, j]], [YM[i, j]]], dtype="float32")
             y = tf.reshape(y, [1, 2, 1])
             x = tf.convert_to_tensor(x)
@@ -266,7 +279,8 @@ def model_loader(model_raw, PATH_TO_WEIGHTS):
         tf.random.uniform(shape=[1, 4, 1], minval=0, maxval=1),
         tf.random.uniform(shape=[1, 2, 1], minval=0, maxval=1),
     )
-    # assert CheckModelInput(argument)
+    assert CheckModelInput(argument)
+    print(argument)
     out = model_raw(argument)
     print("This is an old weight:", model_raw.trainable_weights[0])
     model_raw.load_weights(PATH_TO_WEIGHTS)
@@ -275,6 +289,7 @@ def model_loader(model_raw, PATH_TO_WEIGHTS):
 
 
 if __name__ == "__main__":
+
     for i in range(100):
         print(
             "Current_epsilon", GreedyEstimator(100, i, 0.2, 0.1, 0.8), "at episode", i
