@@ -7,14 +7,14 @@ import time
 from core.simulation.simulation import simulation
 from core.simulation.game import Game
 from core.simulation.reward import RewardId
-from core.simulation.random_generator import random_generator_uniform
+from core.simulation.random_generator import RandomGeneratorUniform
 from core.layers.modelpicnnthree import ModelPICNNThree
 from core.layers.modelpicnntwo import ModelPICNNTwo
 from core.simulation.validation import Optimum2PeriodSolution
 import matplotlib.pyplot as plt
 from core.simulation.simulation import H
 
-random_generator_uniform = random_generator_uniform(0.7, 1.3)
+random_generator_uniform = RandomGeneratorUniform(0.7, 1.3)
 
 
 game_two_period = Game(

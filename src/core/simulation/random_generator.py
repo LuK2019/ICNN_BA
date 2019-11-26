@@ -10,7 +10,7 @@ class RandomGenerator:
 
 
 # TODO: Rename class to uppercase everywhere
-class random_generator_uniform(RandomGenerator):
+class RandomGeneratorUniform(RandomGenerator):
     def __init__(self, lower_bound, upper_bound):
         """The constructor of the random_generator uniform
         Args:

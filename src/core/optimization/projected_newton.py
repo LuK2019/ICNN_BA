@@ -46,7 +46,7 @@ def ProjNewtonLogistic(
         ATlam = A.T.dot(lam)
         z = 1 / (
             1 + np.exp(-ATlam)
-        )  # TODO: Problem: At values of 35 and above for ATlam entries, this vector is just np.ones(2,) -> H is then zero
+        )  # Problem: At values of 35 and above for ATlam entries, this vector is just np.ones(2,) -> H is then zero
         f = -c.dot(lam) + np.sum(logexp1p(ATlam))
         g = -c + A.dot(z)  # -> correct
         H = (A * (z * (1 - z))).dot(A.T)  # -> correct

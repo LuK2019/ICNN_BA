@@ -7,7 +7,7 @@ import time
 from core.simulation.simulation import simulation
 from core.simulation.game import Game
 from core.simulation.reward import RewardId
-from core.simulation.random_generator import random_generator_uniform
+from core.simulation.random_generator import RandomGeneratorUniform
 from core.layers.modelpicnnthree import ModelPICNNThree
 from core.layers.modelpicnntwo import ModelPICNNTwo
 from core.simulation.validation import Optimum2PeriodSolution
@@ -19,7 +19,7 @@ from core.simulation.greedy_estimator import GreedyEstimator
 # Initalize necessary simulation objects:
 
 # Define the random generator for the price process
-random_generator_uniform = random_generator_uniform(0.5, 1.5)
+random_generator_uniform = RandomGeneratorUniform(0.5, 1.5)
 
 # Define the neural network
 # 2 Layer PICNN
@@ -70,7 +70,7 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=9999,
-    LOG_NUM=1004,
+    LOG_NUM=1005,
 )
 
 print(

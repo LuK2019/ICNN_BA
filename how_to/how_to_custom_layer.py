@@ -75,7 +75,7 @@ class some_layer(keras.layers.Layer):
 
     def get_config(self):
         """ Purpose:
-        Used when saving the model TODO:Check out the chapter for that
+        Used when saving the model
         """
         base_config = super().get_config() # We call the config of the parent class
         # This basicly works like:

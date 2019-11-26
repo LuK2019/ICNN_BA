@@ -45,7 +45,7 @@ class Game:
                 {
                 "current_state": np.ndarray [4,1],
                 "action": np.ndarray [2,1]
-                "reward": float/np.ndarray [1,] TODO: TBD
+                "reward": float/np.ndarray [1,] 
                 "next_state": np.ndarray [4,1]
                 }:dict,
                 liqudity cost:float)
@@ -207,10 +207,10 @@ class Game:
 
 
 if __name__ == "__main__":
-    from random_generator import random_generator_uniform
+    from random_generator import RandomGeneratorUniform
     from reward import RewardId
 
-    random_generator = random_generator_uniform(0.9, 1.1)
+    random_generator = RandomGeneratorUniform(0.9, 1.1)
     game = Game(
         x_0=1.0,
         y_0=1.0,
