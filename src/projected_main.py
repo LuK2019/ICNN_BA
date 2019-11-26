@@ -1,11 +1,11 @@
 from core.optimization.bundle_entropy import BundleEntropyMethod
 import tensorflow as tf
 import numpy as np
-from core.layers.model_ICNN_three  import model_ICNN_three 
+from core.layers.modelpicnnthree  import ModelPICNNThree 
 from core.optimization.projected_newton import ProjNewtonLogistic
 
 
-negQ = model_ICNN_three ([1000, 100], [1000, 100, 1])
+negQ = ModelPICNNThree ([1000, 100], [1000, 100, 1])
 
 
 A = np.array([[90.440674, 72.57225], [-3.1540527, 39.155697], [33.440674, 22.57225]])

@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-from core.layers.model_ICNN_three import model_ICNN
+from core.layers.modelpicnnthree import ModelPICNNThree
 from core.optimization.bundle_entropy import BundleEntropyMethod
 from core.optimization.projected_newton import ProjNewtonLogistic
 import core.optimization.pdipm as pdipm
@@ -19,7 +19,7 @@ G = np.array(
 h = np.array([88.05084, 101.968185, 103.24681, 112.075455])
 pdipm.pdipm_boyd(G, h)
 
-negQ = model_ICNN(
+negQ = ModelPICNNThree(
     [50, 50],
     [50, 50, 1],
     weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.3),

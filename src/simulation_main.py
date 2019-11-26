@@ -8,8 +8,8 @@ from core.simulation.simulation import simulation
 from core.simulation.game import Game
 from core.simulation.reward import RewardId
 from core.simulation.random_generator import random_generator_uniform
-from core.layers.model_ICNN_three import model_ICNN_three
-from core.layers.model_ICNN_two import model_ICNN_two
+from core.layers.modelpicnnthree import ModelPICNNThree
+from core.layers.modelpicnntwo import ModelPICNNTwo
 from core.simulation.validation import Optimum2PeriodSolution
 import matplotlib.pyplot as plt
 
@@ -23,7 +23,7 @@ random_generator_uniform = random_generator_uniform(0.5, 1.5)
 
 # Define the neural network
 # 2 Layer PICNN
-negQ = model_ICNN_two(
+negQ = ModelPICNNTwo(
     [200],
     [200, 1],
     weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.4),
@@ -62,7 +62,7 @@ simulation = simulation(
     greedy_estimator=greedy_estimator,
     ICNN_model=negQ,
     game=game_two_period,
-    num_episodes=10000,
+    num_episodes=10,
     ITERATIONS=1,
     size_minibatches=1,
     capacity_replay_memory=1,
@@ -70,7 +70,7 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=9999,
-    LOG_NUM=1003,
+    LOG_NUM=1004,
 )
 
 print(
@@ -103,7 +103,7 @@ print("Simulation took {}".format(end_simulation - start_simulation))
 print("First Weight:", simulation.negQ.trainable_variables[0])
 
 # # test the optimization on a model
-# model = model_ICNN_three([100,200], [200,200,1])
+# model = ModelPICNNThree([100,200], [200,200,1])
 
 # # Data
 # x = tf.Variable([[4.],[2.],[1.]], dtype="float32")
@@ -129,8 +129,8 @@ print("First Weight:", simulation.negQ.trainable_variables[0])
 
 # tf.multiply(y, tf.matmul(self.W_0_yu, x) + self.b_0_y))
 
-# W_0_yu = [v for v in model.trainable_variables if v.name == "model_icnn_2/z_1/W_0_yu:0"][0]
-# b_0_y = [v for v in model.trainable_variables if v.name == "model_icnn_2/z_1/b_0_y:0"][0]
+# W_0_yu = [v for v in model.trainable_variables if v.name == "ModelPICNNThree_2/z_1/W_0_yu:0"][0]
+# b_0_y = [v for v in model.trainable_variables if v.name == "ModelPICNNThree_2/z_1/b_0_y:0"][0]
 
 # right_side = tf.matmul(W_0_yu, x) + b_0_y
 # var

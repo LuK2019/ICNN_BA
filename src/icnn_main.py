@@ -1,14 +1,14 @@
 import tensorflow as tf
 import numpy as np
-from core.layers.model_ICNN_three  import model_ICNN_three 
-from core.layers.model_ICNN_two import model_ICNN_two
+from core.layers.modelpicnnthree import ModelPICNNThree
+from core.layers.modelpicnntwo import ModelPICNNTwo
 from core.utils.utils import PlotFunction
 import matplotlib.pyplot as plt
 from core.utils.utils import CheckModelInput
 
 ### MODEL WITH 2 LAYERS ###
 
-model2 = model_ICNN_two(
+model2 = ModelPICNNTwo(
     [10],
     [10, 1],
     weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.01),
@@ -28,7 +28,7 @@ for k in np.arange(start=100, stop=200, step=10):
     print("Current std:", k * 0.1)
     k_avg = []
     for _ in range(10):
-        model2 = model_ICNN_two(
+        model2 = ModelPICNNTwo(
             [k],
             [k, 1],
             weight_initializer=tf.random_normal_initializer(mean=0.0, stddev=0.1),
@@ -65,7 +65,7 @@ print(gradient)
 
 ### MODEL WITH 3 LAYERS ###
 
-model3 = model_ICNN_three ([10, 10], [10, 10, 1])
+model3 = ModelPICNNThree([10, 10], [10, 10, 1])
 # x = tf.random.uniform([1, 4, 1], minval=-20, maxval=30)
 # PlotFunction(model3, x, BEGIN=-10, END=10, GRANULARITY=0.25, regularized=False)
 # PlotFunction(model3, x, BEGIN=0.1, END=0.99, GRANULARITY=0.025, regularized=True)

@@ -8,8 +8,8 @@ from core.simulation.simulation import simulation
 from core.simulation.game import Game
 from core.simulation.reward import RewardId
 from core.simulation.random_generator import random_generator_uniform
-from core.layers.model_ICNN_three import model_ICNN_three
-from core.layers.model_ICNN_two import model_ICNN_two
+from core.layers.modelpicnnthree import ModelPICNNThree
+from core.layers.modelpicnntwo import ModelPICNNTwo
 from core.simulation.validation import Optimum2PeriodSolution
 import matplotlib.pyplot as plt
 from core.simulation.simulation import H
