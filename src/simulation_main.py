@@ -5,20 +5,24 @@ import time
 
 # Custom packages
 from core.simulation.simulation import simulation
-from core.simulation.game import game
+from core.simulation.game import Game
 from core.simulation.reward import RewardId
 from core.simulation.random_generator import random_generator_uniform
 from core.layers.model_ICNN_three import model_ICNN_three
 from core.layers.model_ICNN_two import model_ICNN_two
-from core.simulation.validation import optimum_2p_solution
+from core.simulation.validation import Optimum2PeriodSolution
 import matplotlib.pyplot as plt
-from core.simulation.simulation import H
 
+# from core.simulation.simulation import H #TODO: Can i delete it?
+from core.simulation.greedy_estimator import GreedyEstimator
 
 # Initalize necessary simulation objects:
+
+# Define the random generator for the price process
 random_generator_uniform = random_generator_uniform(0.5, 1.5)
 
-# For the 2 layer PICNN case:
+# Define the neural network
+# 2 Layer PICNN
 negQ = model_ICNN_two(
     [200],
     [200, 1],
@@ -26,7 +30,9 @@ negQ = model_ICNN_two(
     name="negQ",
 )
 
-game_two_period = game(
+# Define the game setting
+# Two period game
+game_two_period = Game(
     x_0=5.0,
     y_0=10.0,
     S_0=1.0,
@@ -36,7 +42,8 @@ game_two_period = game(
     reward_func=RewardId,
 )
 
-game_three_period = game(
+# Three period game
+game_three_period = Game(
     x_0=1.0,
     y_0=10.0,
     S_0=1.0,
@@ -45,12 +52,17 @@ game_three_period = game(
     random_generator=random_generator_uniform,
     reward_func=RewardId,
 )
+# Define exploration process via the epsilon greedy factor
+greedy_estimator = GreedyEstimator(
+    stop_exploring_at=0.05, final_exploration_rate=0.1, stagnate_epsilon_at=0.2
+)
 
-
+# Setup the simulation object
 simulation = simulation(
+    greedy_estimator=greedy_estimator,
     ICNN_model=negQ,
     game=game_two_period,
-    num_episodes=1000,
+    num_episodes=10000,
     ITERATIONS=1,
     size_minibatches=1,
     capacity_replay_memory=1,
@@ -58,13 +70,13 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=9999,
-    LOG_NUM=1000,
+    LOG_NUM=1003,
 )
 
 print(
     "\n==============",
     "The optimal choice of this simulation is {}, with expected value of the random generator {}".format(
-        optimum_2p_solution(
+        Optimum2PeriodSolution(
             np.array(
                 [
                     [game_three_period.x_0],
