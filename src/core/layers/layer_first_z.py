@@ -69,7 +69,7 @@ class layer_first_z(keras.layers.Layer):
             5. y has shape: [batch_size, m, 1], i.e. a 3D list of column vectors
 
             Warning: The layer won't check for input correctness, you have to use
-            assert utils.check_model_input(argument), before calling the model with the data
+            assert utils.CheckModelInput(argument), before calling the model with the data
             Args:
                 input = (x,y) input tuple following the above conventions
             Returns:

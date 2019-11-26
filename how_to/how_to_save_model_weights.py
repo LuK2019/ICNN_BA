@@ -5,12 +5,12 @@ import time
 
 # Custom packages
 from core.simulation.simulation import simulation
-from core.simulation.game import game
+from core.simulation.Game import game
 from core.simulation.reward import RewardId
 from core.simulation.random_generator import random_generator_uniform
 from core.layers.model_ICNN_three import model_ICNN_three
 from core.layers.model_ICNN_two import model_ICNN_two
-from core.simulation.validation import optimum_2p_solution
+from core.simulation.validation import Optimum2PeriodSolution
 from core.utils.utils import model_loader
 import matplotlib.pyplot as plt
 from core.simulation.simulation import H

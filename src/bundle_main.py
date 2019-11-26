@@ -5,7 +5,7 @@ from core.layers.model_ICNN_three import model_ICNN
 from core.optimization.bundle_entropy import BundleEntropyMethod
 from core.optimization.projected_newton import ProjNewtonLogistic
 import core.optimization.pdipm as pdipm
-from core.utils.utils import plot_function
+from core.utils.utils import PlotFunction
 
 
 G = np.array(
@@ -32,5 +32,5 @@ for i in range(10):
 
     print("result", BundleEntropyMethod(negQ, x, y, 5, solver=pdipm.pdipm_boyd))
 
-plot_function(negQ, x, regularized=True)
+PlotFunction(negQ, x, regularized=True)
 

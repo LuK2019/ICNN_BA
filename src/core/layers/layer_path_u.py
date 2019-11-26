@@ -54,7 +54,7 @@ class layer_path_u(keras.layers.Layer):
         3. x has shape: [batch_size, n, 1], i.e. a 3D list of column vectors
 
             Warning: The layer won't check for input correctness, you have to use
-            assert utils.check_model_input(argument), before calling the model with the data
+            assert utils.CheckModelInput(argument), before calling the model with the data
 
             Returns:
                 tf.tensor of shape [batch_size, n_1, 1]

@@ -1,13 +1,16 @@
 import numpy as np
 
-class random_generator:
+
+class RandomGenerator:
     def __init__(self):
         pass
 
     def generate(self):
         pass
 
-class random_generator_uniform(random_generator):
+
+# TODO: Rename class to uppercase everywhere
+class random_generator_uniform(RandomGenerator):
     def __init__(self, lower_bound, upper_bound):
         """The constructor of the random_generator uniform
         Args:
@@ -16,12 +19,14 @@ class random_generator_uniform(random_generator):
         """
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
-        self.mean = (lower_bound + upper_bound)/2
+        self.mean = (lower_bound + upper_bound) / 2
+
     def generate(self):
         """Random value between [self.lower_bound, self.upper_bound] is generated."""
         return np.random.uniform(self.lower_bound, self.upper_bound)
 
-class random_generator_normal(random_genrator):
+
+class RandomGeneratorNormal(RandomGenerator):
     def __init__(self, std, mean, lower_bound=None, upper_bound=None):
         """Constructor:
         Args:
@@ -35,6 +40,7 @@ class random_generator_normal(random_genrator):
         self.mean = mean
         self.lower_bound = None
         self.upper_bound = None
+
     def generate(self):
         """ Generate a random value from a normal distribution ~ (self.mean, self.std).
         If necessary, the return value is discarded if it does not lie within the 
@@ -42,5 +48,7 @@ class random_generator_normal(random_genrator):
         """
         if (self.lower_bound is None) and (self.upper_bound is None):
             return np.random.normal(loc=self.mean, scale=self.std)
-        elif:
-            raise NotImplemented("Boundaries for normal distribution not implemented yet!")
+        else:
+            raise NotImplemented(
+                "Boundaries for normal distribution not implemented yet!"
+            )

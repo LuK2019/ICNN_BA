@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
 
-def check_model_input(arg, y_is_var=False):
+def CheckModelInput(arg, y_is_var=False):
     """the second argument y = arg[1], can be a tf.Variable
     when desired, instead of a tf.Tensor. This is needed when
     a subsequent derviative of the model w.r.t. to y is needed
@@ -91,15 +91,13 @@ def check_model_input(arg, y_is_var=False):
     return True
 
 
-def H_tf(y, eps=0.0001):  # TODO: Test this
-    # To enforce avoiding log(0), TODO:test this
-    # k = 0
-    # for element in [y1, y2]:
-    #     if element > 1-eps:
-    #         y[k] = 0.99
-    #     if element < eps:
-    #         y[k] = 0.01
-    #     k += 1
+def BarrierH_tf(y):  # TODO: Test this
+    """Barrier function H, tensorflow version, i.e. differentiable
+    Args:
+        y: tensorflow variable of shape [1,n,1]
+    Returns:
+        tf.tensor
+    """
     y = y[0]
     inner = tf.multiply(y, tf.math.log(y)) + tf.multiply(1.0 - y, tf.math.log(1.0 - y))
     out = -tf.reduce_sum(inner)
@@ -108,7 +106,17 @@ def H_tf(y, eps=0.0001):  # TODO: Test this
     )
 
 
-def H(y, eps=0.0001, return_numpy=True):  # TODO: Test this
+def BarrierH(y, eps=0.0001, return_numpy=True):  # TODO: Test this
+    """Barrier H function with numpy computations. 
+
+    Args:
+        y: array of shape [2,1]
+        [eps=0.0001 threshold such that componentens of the input are within [eps, 1-eps] 
+        to avoid log(0) errors]
+        [return_numpy=True return np.float, if false, return tf.Variable]
+    Returns:
+        A float 
+    """
     y1, y2 = y[:, 0]
     y = np.array([y1, y2])
     # To enforce avoiding log(0), TODO:test this
@@ -127,22 +135,16 @@ def H(y, eps=0.0001, return_numpy=True):  # TODO: Test this
         )
 
 
-def parse_4d_state(current_state):
-    a, b, c, d = current_state
-    return np.array([[a], [b], [c], [d]])
-
-
-def parse_2d_action(current_action):
-    a, b = current_action
-    return np.array([[a], [b]])
-
-
-def create_targets(random_minibatch):
+# TODO: Test this
+def CreateTargets(random_minibatch):
     """ Creates the scalar tensor vector of shape [len(random_minibatch), 1, 1] for the loss calculation 
     from the random_minibatch dataframe"""
 
     H_target = np.array(
-        [H(transition["action"]) for index, transition in random_minibatch.iterrows()]
+        [
+            BarrierH(transition["action"])
+            for index, transition in random_minibatch.iterrows()
+        ]
     )
 
     if np.any(np.isnan(H_target)):
@@ -172,7 +174,8 @@ def create_targets(random_minibatch):
     return tf.convert_to_tensor(y_target, dtype="float32")
 
 
-def create_arguments(random_minibatch):
+# TODO: Test this
+def CreateArguments(random_minibatch):
     """ Creates the argument tuple (tf.tensor [len(random_minibatch), 4, 1], tf.tensor [len(random_minibatch), 2, 1], ) for self.negQ for the loss calculation from 
     the random_minibatch dataframe
     """
@@ -188,7 +191,8 @@ def create_arguments(random_minibatch):
     )
 
 
-def plot_function(
+# TODO: Test this
+def PlotFunction(
     f, x, optimum_arg=None, BEGIN=0.01, END=0.99, GRANULARITY=0.05, regularized=False
 ):
     X = np.arange(BEGIN, END, GRANULARITY)
@@ -203,7 +207,7 @@ def plot_function(
             x = tf.convert_to_tensor(x)
             x = tf.reshape(x, [1, 4, 1])
             argument = (x, y)
-            assert check_model_input(argument)
+            assert CheckModelInput(argument)
             if regularized:
                 assert (0 < BEGIN < 1) and (
                     0 < END < 1
@@ -213,7 +217,7 @@ def plot_function(
 
                 def regularized_f(arg):
                     y = arg[1]
-                    return f(arg) - H_tf(y)
+                    return f(arg) - BarrierH_tf(y)
 
                 out = regularized_f(argument).numpy()
             else:
@@ -236,27 +240,42 @@ def plot_function(
     plt.show()
 
 
-def greedy_estimator(
-    total_num_episode,
-    current_episode,
-    stop_exploring_at=0.1,
-    final_exploration_rate=0.1,
-    stagnate_epsilon_at=0.8,
-):
-    if current_episode < total_num_episode * stop_exploring_at:
-        return 1.0
-    total_num_episode_to_decrease = (
-        stagnate_epsilon_at * total_num_episode - total_num_episode * stop_exploring_at
-    )
-    if current_episode < (stagnate_epsilon_at * total_num_episode):
-        increment_of_decrease_per_episode = (
-            1 - final_exploration_rate
-        ) / total_num_episode_to_decrease
-        return 1.0 - increment_of_decrease_per_episode * (
-            current_episode - total_num_episode * stop_exploring_at
-        )
-    else:
-        return final_exploration_rate
+# TODO: ToDelete!
+# def GreedyEstimator(
+#     total_num_episode,
+#     current_episode,
+#     stop_exploring_at=0.1,
+#     final_exploration_rate=0.1,
+#     stagnate_epsilon_at=0.8,
+# ):
+#     """Controls the rate of exploration, i.e. the epsilon value of the bernouilli distribution.
+#     Idea: epsilon==1 for the stop_exploring_at % first episodes,
+#      then linear decline till stagnate_epsilon_at % of episodes at final_exploration_rate
+
+#      Args:
+#         total_num_episodes: Total number of episodes of the simulation
+#         current_epsiode: Current epsiode of the simulation
+#         stop_exploring_at: Till 0.1 * total_num_epsiodes, epsilon == 1
+#         final_exploration_rate: When decline has finished, this is the final epsilon
+#         stagnate_epsilon_at:
+
+#     Returns:
+#         epsilon
+#     """
+#     if current_episode < total_num_episode * stop_exploring_at:
+#         return 1.0
+#     total_num_episode_to_decrease = (
+#         stagnate_epsilon_at * total_num_episode - total_num_episode * stop_exploring_at
+#     )
+#     if current_episode < (stagnate_epsilon_at * total_num_episode):
+#         increment_of_decrease_per_episode = (
+#             1 - final_exploration_rate
+#         ) / total_num_episode_to_decrease
+#         return 1.0 - increment_of_decrease_per_episode * (
+#             current_episode - total_num_episode * stop_exploring_at
+#         )
+#     else:
+#         return final_exploration_rate
 
 
 def grad(model: "ICNN_model", argument_model: "tuple", targets) -> "loss_value, grad":
@@ -271,7 +290,7 @@ def grad(model: "ICNN_model", argument_model: "tuple", targets) -> "loss_value, 
         grad: partial derivative of the loss w.r.t. to weights of model
 
         Warning: Ensure that argument_model suffices the conventions
-        as validated by check_model_input before serving the argument
+        as validated by CheckModelInput before serving the argument
     """
     with tf.GradientTape() as tape:
         output = model(argument_model)
@@ -280,25 +299,22 @@ def grad(model: "ICNN_model", argument_model: "tuple", targets) -> "loss_value, 
     return loss_value, grad
 
 
-def FakeEntropyForTest(a, b, c, K):
-    print("FakeEntropy started.")
-    return np.array(
-        [[np.random.uniform(0, 1)], [np.random.uniform(0, 1)]], dtype=np.float32
-    )
-
-
 def model_loader(model_raw, PATH_TO_WEIGHTS):
-    argument = (tf.random.uniform(shape=[1,4, 1], minval=0, maxval=1), tf.random.uniform(shape=[1,2, 1], minval=0, maxval=1))
-    # assert check_model_input(argument)
+    argument = (
+        tf.random.uniform(shape=[1, 4, 1], minval=0, maxval=1),
+        tf.random.uniform(shape=[1, 2, 1], minval=0, maxval=1),
+    )
+    # assert CheckModelInput(argument)
     out = model_raw(argument)
     print("This is an old weight:", model_raw.trainable_weights[0])
     model_raw.load_weights(PATH_TO_WEIGHTS)
     print("This is the new weight:", model_raw.trainable_variables[0])
     return model_raw
-    
+
+
 if __name__ == "__main__":
     for i in range(100):
         print(
-            "Current_epsilon", greedy_estimator(100, i, 0.2, 0.1, 0.8), "at episode", i
+            "Current_epsilon", GreedyEstimator(100, i, 0.2, 0.1, 0.8), "at episode", i
         )
 

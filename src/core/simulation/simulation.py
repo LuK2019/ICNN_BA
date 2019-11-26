@@ -4,19 +4,19 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
 
+# TODO: Make documentation better!
 from ..optimization.bundle_entropy import BundleEntropyMethod
 from . import validation
 from ..utils.utils import (
-    H,
-    parse_4d_state,
-    parse_2d_action,
-    create_targets,
-    check_model_input,
-    create_arguments,
-    greedy_estimator,
+    # H, # TODO: Can i delete it?
+    CreateTargets,
+    CheckModelInput,
+    CreateArguments,
+    # GreedyEstimator, #TODO: To delete
     grad,
-    plot_function,
+    PlotFunction,
 )
+# from .greedy_estimator import GreedyEstimator #TODO: To delete
 
 
 class simulation:
@@ -29,10 +29,10 @@ class simulation:
         capacity_replay_memory,
         show_plot_every,
         LOG_NUM,
+        greedy_estimator,
         initial_weight_vector=None,
         ITERATIONS=10,
         moving_average_factor=0.01,
-        greedy_factor=greedy_estimator,
         discount_factor=0.99,
         optimization_iterations=5,
         initial_action_for_optimization=tf.Variable([[0.2], [0.7]], dtype="float32"),
@@ -47,7 +47,7 @@ class simulation:
         self.capacity_replay_memory = capacity_replay_memory
         self.initial_weight_vector = initial_weight_vector
         self.moving_average_factor = moving_average_factor
-        self.greedy_factor = greedy_factor
+        self.greedy_estimator = greedy_estimator
         self.discount_factor = discount_factor
         self.optimization_iterations = optimization_iterations
         self.game = game
@@ -137,8 +137,7 @@ class simulation:
                 # Check for exploration action
                 if (
                     np.random.binomial(
-                        1,
-                        self.greedy_factor(self.num_episodes, episode, 0.05, 0.1, 0.2),
+                        1, self.greedy_estimator.get_epsilon(self.num_episodes, episode)
                     )
                     == 1
                 ):
@@ -152,8 +151,8 @@ class simulation:
                         "\n===",
                         "GREEDY: Random action {} chosen at greedy factor {}".format(
                             action,
-                            self.greedy_factor(
-                                self.num_episodes, episode, 0.05, 0.1, 0.5
+                            self.greedy_estimator.get_epsilon(
+                                self.num_episodes, episode
                             ),
                         ),
                     )
@@ -179,7 +178,7 @@ class simulation:
                 # Store action
                 if period == 0:  # TODO: Adjust for multi period
                     chosen_x1 = transition["next_state"][0, 0]
-                    optimal_x1 = validation.optimum_2p_solution(
+                    optimal_x1 = validation.Optimum2PeriodSolution(
                         current_state, self.game
                     )
                     print(
@@ -236,7 +235,7 @@ class simulation:
                         x_arg = tf.convert_to_tensor(x_arg)
                         y_arg = tf.convert_to_tensor(y_arg)
                         argument = (x_arg, y_arg)
-                        assert check_model_input(argument)
+                        assert CheckModelInput(argument)
                         y_m = (
                             transition_batch["reward"]
                             + self.discount_factor * self.negQ_target(argument).numpy()
@@ -276,11 +275,11 @@ class simulation:
                 ####################################################
 
                 # Prepare data for loss calculation
-                y_target = create_targets(random_minibatch=random_minibatch)
+                y_target = CreateTargets(random_minibatch=random_minibatch)
 
                 # negQ argument:
-                argument_training = create_arguments(random_minibatch=random_minibatch)
-                assert check_model_input(argument_training)
+                argument_training = CreateArguments(random_minibatch=random_minibatch)
+                assert CheckModelInput(argument_training)
                 # Calculate the inital loss
                 loss_before, gradient_before = grad(
                     self.negQ, argument_training, y_target
@@ -339,7 +338,7 @@ class simulation:
                             episode
                         )
                     )
-                    plot_function(
+                    PlotFunction(
                         self.negQ,
                         argument_training[0][0],
                         GRANULARITY=0.02,
@@ -370,7 +369,7 @@ class simulation:
                         transition["next_state"][1, 0]
                     ]
                     # Calculate final cash balance for the optimal x1 choice
-                    optimal_final_cash_balance = validation.optimal_final_cash_balance_calc(
+                    optimal_final_cash_balance = validation.FinalCashBalanceWithOptimalChoice(
                         episode_summary["initial_state"][0],
                         transition["current_state"],
                         episode_summary["optimal_choice_of_x1"][0],

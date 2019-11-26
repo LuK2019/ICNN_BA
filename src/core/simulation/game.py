@@ -1,14 +1,14 @@
 import numpy as np
 
 
-def phi(delta_x, alpha):
+def Phi(delta_x, alpha):
     if alpha == 0:
         return delta_x
     else:
         return (np.exp(alpha * delta_x) - 1) / alpha
 
 
-class game:
+class Game:
     def __init__(self, x_0, y_0, S_0, T, alpha, random_generator, reward_func):
         """
         Args:
@@ -94,14 +94,14 @@ class game:
             # 4.1. lower bound
             lower_bound = 0
             # 4.2. upper bound
-            upper_bound = y - phi(-x, self.alpha) * S
+            upper_bound = y - Phi(-x, self.alpha) * S
 
             # The agent does not know about liquidity effects
             required_change_in_stocks_for_change_in_cash = -change_in_cash_desired / S
 
             # Check bounds
             next_y_before_check = (
-                y - phi(required_change_in_stocks_for_change_in_cash, self.alpha) * S
+                y - Phi(required_change_in_stocks_for_change_in_cash, self.alpha) * S
             )
             # Case 1: y+change_in_cash_desired < 0
             if next_y_before_check < lower_bound:
@@ -138,7 +138,7 @@ class game:
 
             delta_x = next_x - x
 
-            next_y = y - phi(delta_x, self.alpha) * S
+            next_y = y - Phi(delta_x, self.alpha) * S
             if np.abs(next_y) < 0.0001:
                 next_y = 0.0
 
@@ -171,7 +171,7 @@ class game:
         else:
             next_x = 0
             delta_x = next_x - x
-            next_y = y - phi(delta_x, self.alpha) * S
+            next_y = y - Phi(delta_x, self.alpha) * S
             change_in_cash = next_y - y
             next_S = S * self.random_generator.generate()
             next_t = t + 1
@@ -196,12 +196,12 @@ class game:
 
         # Calculate liquidity costs, i.e. the difference in cash after the trade between the scenarios with and without liquidity costs
         # denote the amount of cash with liquidity costs y_1_L, without liquidity costs y_1:
-        # 0 \leq y_1_L - y_1 = (delta_x-phi(delta_x))S_0
+        # 0 \leq y_1_L - y_1 = (delta_x-Phi(delta_x))S_0
         actual_delta_x = (
             return_dict["next_state"][0, 0] - return_dict["current_state"][0, 0]
         )
         liquidity_costs = (
-            actual_delta_x - phi(actual_delta_x, self.alpha)
+            actual_delta_x - Phi(actual_delta_x, self.alpha)
         ) * return_dict["current_state"][2, 0]
         return (return_dict, liquidity_costs)
 
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     from reward import RewardId
 
     random_generator = random_generator_uniform(0.9, 1.1)
-    game = game(
+    game = Game(
         x_0=1.0,
         y_0=1.0,
         S_0=1.0,

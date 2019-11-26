@@ -82,7 +82,7 @@ class model_ICNN_three(keras.models.Model):
             5. y has shape: [batch_size, m, 1], i.e. a 3D list of column vectors
 
             Warning: The model won't check for input correctness, you have to use
-            assert utils.check_model_input(argument, y_is_var=True/False), before calling the model with the data
+            assert utils.CheckModelInput(argument, y_is_var=True/False), before calling the model with the data
 
             Returns:
                 tf.tensor, dtype=float32, shape [batch_size, layer_params_z[-1], 1] (even if y is tf.Variable, it returns tf.tensor)

@@ -4,6 +4,6 @@ import numpy as np
 
 
 def RewardId(change_in_cash, scale=1):
-    """Reward awarded is identical to the change in cash achieved"""
+    """Reward awarded is identical to the change in cash"""
     return change_in_cash * scale
 

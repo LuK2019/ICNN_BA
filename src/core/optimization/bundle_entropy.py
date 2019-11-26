@@ -51,7 +51,7 @@ def BundleEntropyMethod(
             y_variable = tf.Variable(y, dtype="float32")
             x_tensor = tf.convert_to_tensor(x, dtype="float32")
             argument = (x_tensor, y_variable)
-            assert utils.check_model_input(argument, y_is_var=True)
+            assert utils.CheckModelInput(argument, y_is_var=True)
 
             # Calculate the gradient
             with tf.GradientTape() as tape:
@@ -68,7 +68,7 @@ def BundleEntropyMethod(
                 y = tf.reshape(y, [1, 2, 1])
                 y = tf.Variable(y)
             argument = (x, y)
-            assert utils.check_model_input(argument, y_is_var=True)
+            assert utils.CheckModelInput(argument, y_is_var=True)
             with tf.GradientTape() as tape:
                 # Evaluate the gradient of f((x, . )) w.r.t. to the second argument at y
                 f_out = f(argument)
@@ -115,7 +115,7 @@ def BundleEntropyMethod(
                         )
                         print("Return current best value")
                         print("Check funciton")
-                        utils.plot_function(
+                        utils.PlotFunction(
                             f, x, optimum_arg=y, BEGIN=0.01, END=0.99, GRANULARITY=0.02
                         )
 
