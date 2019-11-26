@@ -9,7 +9,6 @@ class RandomGenerator:
         pass
 
 
-# TODO: Rename class to uppercase everywhere
 class RandomGeneratorUniform(RandomGenerator):
     def __init__(self, lower_bound, upper_bound):
         """The constructor of the random_generator uniform

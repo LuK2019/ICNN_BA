@@ -4,19 +4,15 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import os
 
-# TODO: Make documentation better!
 from ..optimization.bundle_entropy import BundleEntropyMethod
 from . import validation
 from ..utils.utils import (
-    # H, # TODO: Can i delete it?
     CreateTargets,
     CheckModelInput,
     CreateArguments,
-    # GreedyEstimator, #TODO: To delete
     grad,
     PlotFunction,
 )
-# from .greedy_estimator import GreedyEstimator #TODO: To delete
 
 
 class simulation:
@@ -65,7 +61,7 @@ class simulation:
         {
             "current_state": np.ndarray [4,1] np.float32,
             "action": np.ndarray [2,1] np.float32,
-            "reward": float/np.ndarray [1,] TODO: TBD
+            "reward": float/np.ndarray [1,] 
             "next_state": np.ndarray [4,1] np.float32
         }
 
@@ -167,7 +163,8 @@ class simulation:
                 # Execute action and watch environment
                 transition, liquidity_costs = self.game.get_new_state(
                     current_state, action
-                )  # TODO: Remove old get_new_state and rename it
+                )
+                # Add current liquidity costs to previous cumulative sum
                 cumulative_liquidity_costs += liquidity_costs
                 assert (
                     transition["next_state"][3, 0] <= self.game.T
@@ -225,7 +222,7 @@ class simulation:
                     if transition_batch["current_state"][3] == (self.game.T - 1):
                         y_m = transition_batch[
                             "reward"
-                        ]  # TODO: TBD needs to have same dtype as reward
+                        ]  # Needs to have same dtype as reward
                     # Case 2.2: Transition from state_t to state_(t+1), whereas state_(t+1) is not the final period
                     elif transition_batch["current_state"][3] < (self.game.T - 1):
                         x_arg = transition_batch["next_state"]

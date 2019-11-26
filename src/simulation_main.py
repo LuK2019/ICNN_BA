@@ -13,7 +13,6 @@ from core.layers.modelpicnntwo import ModelPICNNTwo
 from core.simulation.validation import Optimum2PeriodSolution
 import matplotlib.pyplot as plt
 
-# from core.simulation.simulation import H #TODO: Can i delete it?
 from core.simulation.greedy_estimator import GreedyEstimator
 
 # Initalize necessary simulation objects:

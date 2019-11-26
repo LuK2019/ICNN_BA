@@ -240,44 +240,6 @@ def PlotFunction(
     plt.show()
 
 
-# TODO: ToDelete!
-# def GreedyEstimator(
-#     total_num_episode,
-#     current_episode,
-#     stop_exploring_at=0.1,
-#     final_exploration_rate=0.1,
-#     stagnate_epsilon_at=0.8,
-# ):
-#     """Controls the rate of exploration, i.e. the epsilon value of the bernouilli distribution.
-#     Idea: epsilon==1 for the stop_exploring_at % first episodes,
-#      then linear decline till stagnate_epsilon_at % of episodes at final_exploration_rate
-
-#      Args:
-#         total_num_episodes: Total number of episodes of the simulation
-#         current_epsiode: Current epsiode of the simulation
-#         stop_exploring_at: Till 0.1 * total_num_epsiodes, epsilon == 1
-#         final_exploration_rate: When decline has finished, this is the final epsilon
-#         stagnate_epsilon_at:
-
-#     Returns:
-#         epsilon
-#     """
-#     if current_episode < total_num_episode * stop_exploring_at:
-#         return 1.0
-#     total_num_episode_to_decrease = (
-#         stagnate_epsilon_at * total_num_episode - total_num_episode * stop_exploring_at
-#     )
-#     if current_episode < (stagnate_epsilon_at * total_num_episode):
-#         increment_of_decrease_per_episode = (
-#             1 - final_exploration_rate
-#         ) / total_num_episode_to_decrease
-#         return 1.0 - increment_of_decrease_per_episode * (
-#             current_episode - total_num_episode * stop_exploring_at
-#         )
-#     else:
-#         return final_exploration_rate
-
-
 def grad(model: "ICNN_model", argument_model: "tuple", targets) -> "loss_value, grad":
     """Compute a the gradient of the loss of model w.r.t. to target
     Args:
