@@ -13,3 +13,9 @@ src/core/simulation/__pycache__/reward.cpython-37.pyc
 src/core/simulation/__pycache__/random_generator.cpython-37.pyc
 src/core/simulation/__pycache__/greedy_estimator.cpython-37.pyc
 src/core/simulation/__pycache__/game.cpython-37.pyc
+src/core/simulation/__pycache__/
+src/core/optimization/__pycache__/
+src/core/layers/__pycache__/
+how_to/
+__pycache__/
+.vscode/
