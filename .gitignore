@@ -19,3 +19,5 @@ src/core/layers/__pycache__/
 how_to/
 __pycache__/
 .vscode/
+src/.ipynb_checkpoints/
+tests/.ipynb_checkpoints/
