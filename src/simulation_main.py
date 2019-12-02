@@ -53,7 +53,7 @@ game_three_period = Game(
 )
 # Define exploration process via the epsilon greedy factor
 greedy_estimator = GreedyEstimator(
-    stop_exploring_at=0.05, final_exploration_rate=0.1, stagnate_epsilon_at=0.2
+    stop_exploring_at=0.075, final_exploration_rate=0.1, stagnate_epsilon_at=0.25
 )
 
 # Setup the simulation object
@@ -61,15 +61,15 @@ simulation = simulation(
     greedy_estimator=greedy_estimator,
     ICNN_model=negQ,
     game=game_two_period,
-    num_episodes=10,
+    num_episodes=50000,
     ITERATIONS=1,
     size_minibatches=1,
     capacity_replay_memory=1,
     optimization_iterations=3,
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
-    show_plot_every=9999,
-    LOG_NUM=1005,
+    show_plot_every=49999,
+    LOG_NUM=2000,
 )
 
 print(
@@ -100,43 +100,3 @@ end_simulation = time.time()
 print("Simulation took {}".format(end_simulation - start_simulation))
 
 print("First Weight:", simulation.negQ.trainable_variables[0])
-
-# # test the optimization on a model
-# model = ModelPICNNThree([100,200], [200,200,1])
-
-# # Data
-# x = tf.Variable([[4.],[2.],[1.]], dtype="float32")
-# y = tf.Variable([[4.]], dtype="float32")
-
-# # Prediction
-# pred = model((x,y))
-# print("Forward Pass", pred)
-
-# # Optimization
-# result = BundleEntropyMethod(model, x, y, 10)
-
-# print("The result of the optimization", result)
-
-# args = np.linspace(0,1,num=100)
-# pred_list = [model((x,tf.Variable([[arg]], dtype="float32"))) for arg in args]
-# pred_list_np = [i.numpy() for i in pred_list]
-# pred_list_np_zoom = [i[0][0]for i in pred_list_np]
-# import matplotlib.pyplot as plt
-# plt.scatter(args, pred_list_np_zoom)
-# plt.show()
-
-
-# tf.multiply(y, tf.matmul(self.W_0_yu, x) + self.b_0_y))
-
-# W_0_yu = [v for v in model.trainable_variables if v.name == "ModelPICNNThree_2/z_1/W_0_yu:0"][0]
-# b_0_y = [v for v in model.trainable_variables if v.name == "ModelPICNNThree_2/z_1/b_0_y:0"][0]
-
-# right_side = tf.matmul(W_0_yu, x) + b_0_y
-# var
-# var = model.trainable_variables
-
-# def f(arg):
-#     x,y = arg
-#     return 6*y[0]**2 + 6*y[1]**2
-
-# BundleEntropyMethod(f, x, tf.Variable([[1.],[1.]], dtype="float32"),10)
