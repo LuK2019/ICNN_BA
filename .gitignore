@@ -21,3 +21,4 @@ __pycache__/
 .vscode/
 src/.ipynb_checkpoints/
 tests/.ipynb_checkpoints/
+docs/
