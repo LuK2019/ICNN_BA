@@ -18,7 +18,7 @@ from core.simulation.greedy_estimator import GreedyEstimator
 # Initalize necessary simulation objects:
 
 # Define the random generator for the price process
-random_generator_uniform = RandomGeneratorUniform(0.5, 1.5)
+random_generator_uniform = RandomGeneratorUniform(0.8, 1.8)
 
 # Define the neural network
 # 2 Layer PICNN
@@ -36,7 +36,7 @@ game_two_period = Game(
     y_0=10.0,
     S_0=1.0,
     T=2,
-    alpha=0.01,
+    alpha=1,
     random_generator=random_generator_uniform,
     reward_func=RewardId,
 )
@@ -68,8 +68,9 @@ simulation = simulation(
     optimization_iterations=3,
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
-    show_plot_every=49999,
-    LOG_NUM=2000,
+    show_plot_every=1000000,
+    LOG_NUM=9004,
+    initial_action_for_optimization=tf.Variable([[0.7], [0.2]]),
 )
 
 print(

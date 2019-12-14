@@ -173,20 +173,23 @@ class simulation:
                 )
 
                 # Store action
-                if period == 0:  # TODO: Adjust for multi period
+                if period < self.game.T-1:  # TODO: Adjust for multi period
                     chosen_x1 = transition["next_state"][0, 0]
-                    optimal_x1 = validation.Optimum2PeriodSolution(
-                        current_state, self.game
-                    )
-                    print(
-                        "\n===",
-                        "Your choice: {}, Optimal choice: {}, Difference: {}".format(
-                            chosen_x1, optimal_x1, chosen_x1 - optimal_x1
-                        ),
-                        "\n===",
-                    )
+                    if self.game.T == 2:
+                        optimal_x1 = validation.Optimum2PeriodSolution(
+                            current_state, self.game
+                        )
+                        print(
+                            "\n===",
+                            "Your choice: {}, Optimal choice: {}, Difference: {}".format(
+                                chosen_x1, optimal_x1, chosen_x1 - optimal_x1
+                            ),
+                            "\n===",
+                        )
+                        
                     episode_summary["agent_choice_of_x1"] = [chosen_x1]
-                    episode_summary["optimal_choice_of_x1"] = [optimal_x1]
+                    if self.game.T == 2:
+                        episode_summary["optimal_choice_of_x1"] = [optimal_x1]
 
                 # Store transition in replay memory
                 replay_memory = replay_memory.append(transition, ignore_index=True)
@@ -358,23 +361,24 @@ class simulation:
                 )
 
                 # Store final cash balance
-                if period == 1:  # TODO: Adjust for multi period
+                if period == self.game.T-1:  # TODO: Adjust for multi period
                     assert (
-                        current_state[3, 0] == 2
+                        current_state[3, 0] == self.game.T
                     ), "If we are at period == 1, i.e. the final period, the current_state for the next iteration should be prepped as one of period 2"
                     episode_summary["agent_final_cash_balance"] = [
                         transition["next_state"][1, 0]
                     ]
                     # Calculate final cash balance for the optimal x1 choice
-                    optimal_final_cash_balance = validation.FinalCashBalanceWithOptimalChoice(
-                        episode_summary["initial_state"][0],
-                        transition["current_state"],
-                        episode_summary["optimal_choice_of_x1"][0],
-                        self.game,
-                    )
-                    episode_summary["optimal_final_cash_balance"] = [
-                        optimal_final_cash_balance
-                    ]
+                    if self.game.T == 2:
+                        optimal_final_cash_balance = validation.FinalCashBalanceWithOptimalChoice(
+                            episode_summary["initial_state"][0],
+                            transition["current_state"],
+                            episode_summary["optimal_choice_of_x1"][0],
+                            self.game,
+                        )
+                        episode_summary["optimal_final_cash_balance"] = [
+                            optimal_final_cash_balance
+                        ]
                     episode_summary["cumulative_liquidity_costs"] = [
                         cumulative_liquidity_costs
                     ]
