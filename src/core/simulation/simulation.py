@@ -95,6 +95,10 @@ class simulation:
                 "cumulative_liquidity_costs",
             ]
         )
+        if self.game.T > 2:
+            simulation_summary_transition = pd.DataFrame(
+                columns=["episode", "current_state", "next_state"]
+            )
         # Initialize replay_memory
         replay_memory = pd.DataFrame(
             columns=["current_state", "action", "reward", "next_state"]
@@ -173,7 +177,7 @@ class simulation:
                 )
 
                 # Store action
-                if period < self.game.T-1:  # TODO: Adjust for multi period
+                if period < self.game.T - 1:  # TODO: Adjust for multi period
                     chosen_x1 = transition["next_state"][0, 0]
                     if self.game.T == 2:
                         optimal_x1 = validation.Optimum2PeriodSolution(
@@ -186,7 +190,7 @@ class simulation:
                             ),
                             "\n===",
                         )
-                        
+
                     episode_summary["agent_choice_of_x1"] = [chosen_x1]
                     if self.game.T == 2:
                         episode_summary["optimal_choice_of_x1"] = [optimal_x1]
@@ -324,13 +328,13 @@ class simulation:
                     ####################################################
                     ################### TRAINING:END ###################
                     ####################################################
-                if (episode % 10 == 0) & (episode > 2):
-                    d = {
-                        "episode": episode,
-                        "weight0": [self.negQ.trainable_variables[0][0][0]],
-                        "weight3": [self.negQ.trainable_variables[0][3][0]],
-                        "weight10": [self.negQ.trainable_variables[0][10][0]],
-                    }
+                # if (episode % 10 == 0) & (episode > 2):
+                #     d = {
+                #         "episode": episode,
+                #         "weight0": [self.negQ.trainable_variables[0][0][0]],
+                #         "weight3": [self.negQ.trainable_variables[0][3][0]],
+                #         "weight10": [self.negQ.trainable_variables[0][10][0]],
+                #     }
 
                 if (episode % self.show_plot_every == 0) & (episode > 2):
                     print(
@@ -359,9 +363,24 @@ class simulation:
                     "\n====",
                     transition,
                 )
+                ####### HERE ADD TRANSITION STORAGE #####
+                if self.game.T > 2:
+                    simulation_summary_transition_period = pd.DataFrame(
+                        [
+                            {
+                                "episode": episode,
+                                "current_state": transition["current_state"],
+                                "next_state": transition["next_state"],
+                            }
+                        ]
+                    )
+                    simulation_summary_transition = simulation_summary_transition.append(
+                        simulation_summary_transition_period, ignore_index=True
+                    )
+                #########################################
 
                 # Store final cash balance
-                if period == self.game.T-1:  # TODO: Adjust for multi period
+                if period == self.game.T - 1:  # TODO: Adjust for multi period
                     assert (
                         current_state[3, 0] == self.game.T
                     ), "If we are at period == 1, i.e. the final period, the current_state for the next iteration should be prepped as one of period 2"
@@ -386,16 +405,25 @@ class simulation:
                     simulation_summary = simulation_summary.append(
                         episode_summary, ignore_index=True
                     )
+
         # Training has finished:
         # Save the experience
         self.replay_memory = replay_memory
         self.simulation_summary = simulation_summary
+        self.simulation_summary_transition = simulation_summary_transition
         simulation_summary.to_pickle(
             os.path.join(
                 LOG_DIR_SIMULATION_SUMMARY,
                 "simulation_summary_log_{}.pkl".format(self.LOG_NUM),
             )
         )
+        simulation_summary_transition.to_pickle(
+            os.path.join(
+                LOG_DIR_SIMULATION_SUMMARY,
+                "simulation_summary_transition_log_{}.pkl".format(self.LOG_NUM),
+            )
+        )
+
         WEIGHT_DIR = os.path.join(LOG_DIR_WEIGHTS, "1")
         self.negQ.save_weights(WEIGHT_DIR)
         # END
