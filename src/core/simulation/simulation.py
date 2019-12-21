@@ -410,19 +410,17 @@ class simulation:
         # Save the experience
         self.replay_memory = replay_memory
         self.simulation_summary = simulation_summary
-        self.simulation_summary_transition = simulation_summary_transition
+        if self.game.T > 2:
+            self.simulation_summary_transition = simulation_summary_transition
+            simulation_summary_transition.to_pickle(os.path.join(LOG_DIR_SIMULATION_SUMMARY, "simulation_summary_transition_log_{}.pkl".format(self.LOG_NUM)))
+            
         simulation_summary.to_pickle(
             os.path.join(
                 LOG_DIR_SIMULATION_SUMMARY,
                 "simulation_summary_log_{}.pkl".format(self.LOG_NUM),
             )
         )
-        simulation_summary_transition.to_pickle(
-            os.path.join(
-                LOG_DIR_SIMULATION_SUMMARY,
-                "simulation_summary_transition_log_{}.pkl".format(self.LOG_NUM),
-            )
-        )
+
 
         WEIGHT_DIR = os.path.join(LOG_DIR_WEIGHTS, "1")
         self.negQ.save_weights(WEIGHT_DIR)

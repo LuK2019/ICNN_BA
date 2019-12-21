@@ -69,7 +69,7 @@ simulation = simulation(
     optimizer=tf.keras.optimizers.SGD(learning_rate=0.000025),
     discount_factor=0.5,
     show_plot_every=1000000,
-    LOG_NUM=9004,
+    LOG_NUM=3336,
     initial_action_for_optimization=tf.Variable([[0.7], [0.2]]),
 )
 
