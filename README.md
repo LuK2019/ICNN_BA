@@ -1,5 +1,4 @@
-# Input Convex Neural Networks and Deep-Q-Learning Code Repository
-
+# Input Convex Neural Networks and Deep-Q-Learning 
 ## Project Structure
 ```bash
 ├───configs # .yml setup file for anaconda environment 
