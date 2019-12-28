@@ -16,6 +16,7 @@ src/core/simulation/__pycache__/game.cpython-37.pyc
 src/core/simulation/__pycache__/
 src/core/optimization/__pycache__/
 src/core/layers/__pycache__/
+src/simulation_main copy.py
 how_to/
 __pycache__/
 .vscode/
