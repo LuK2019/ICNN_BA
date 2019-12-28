@@ -15,7 +15,7 @@ from ..utils.utils import (
 )
 
 
-class simulation:
+class Simulation:
     def __init__(
         self,
         ICNN_model,

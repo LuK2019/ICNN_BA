@@ -4,7 +4,7 @@ import numpy as np
 import time
 
 # Custom packages
-from core.simulation.simulation import simulation
+from core.simulation.simulation import Simulation
 from core.simulation.game import Game
 from core.simulation.reward import RewardId
 from core.simulation.random_generator import RandomGeneratorUniform
@@ -57,7 +57,7 @@ greedy_estimator = GreedyEstimator(
 )
 
 # Setup the simulation object
-simulation = simulation(
+simulation = Simulation(
     greedy_estimator=greedy_estimator,
     ICNN_model=negQ,
     game=game_two_period,
