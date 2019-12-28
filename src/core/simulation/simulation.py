@@ -380,10 +380,10 @@ class Simulation:
                 #########################################
 
                 # Store final cash balance
-                if period == self.game.T - 1:  # TODO: Adjust for multi period
+                if period == self.game.T - 1:  
                     assert (
                         current_state[3, 0] == self.game.T
-                    ), "If we are at period == 1, i.e. the final period, the current_state for the next iteration should be prepped as one of period 2"
+                    ), "If we are at period == T-1, i.e. the final period, the current_state for the next iteration should be prepped as one of period T"
                     episode_summary["agent_final_cash_balance"] = [
                         transition["next_state"][1, 0]
                     ]
