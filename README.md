@@ -40,8 +40,8 @@ Load log data in simulation_evaluation_main.ipynb Jupyter Notebook and view the 
 
 ## Reference
 
-B. Amos, L. Xu, and J. Z. Kolter, \Input convex neural networks," in Proceedings of the 34th
-International Conference on Machine Learning-Volume 70, pp. 146{155, 2017.
+B. Amos, L. Xu, and J. Z. Kolter, Input convex neural networks, in Proceedings of the 34th
+International Conference on Machine Learning-Volume 70, 2017
 
 Paper: https://arxiv.org/pdf/1609.07152.pdf
 
