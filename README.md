@@ -36,4 +36,12 @@ Save changes in simulation_main.py and run the script in conda environment
 
 #### 5. View Results
 
+## Reference
+
+B. Amos, L. Xu, and J. Z. Kolter, \Input convex neural networks," in Proceedings of the 34th
+International Conference on Machine Learning-Volume 70, pp. 146{155, 2017.
+
+Paper: https://arxiv.org/pdf/1609.07152.pdf
+Repository: https://github.com/locuslab/icnn
+
 Load log data in simulation_evaluation_main.ipynb Jupyter Notebook and view the simulation data
