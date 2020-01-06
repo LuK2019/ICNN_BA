@@ -12,11 +12,11 @@
             └───simulation.py  # Deep-Q-Learning algorithm
             # Contains further simulation architecture components 
 │       └───utils # Contains various helper functions
-├───tests
+├───simulation_data # Data with the 3 examples for the jupyter notebooks
 ```
 
 ## Simulation Setup
-#### 1. Clone repository to local machine
+#### 1. Clone repository
 
 Follow https://help.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository on how to clone the remote repository to local machine 
 
@@ -37,5 +37,3 @@ Save changes in simulation_main.py and run the script in conda environment
 #### 5. View Results
 
 Load log data in simulation_evaluation_main.ipynb Jupyter Notebook and view the simulation data
-
-##### to be continued... 
