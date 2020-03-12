@@ -1,4 +1,4 @@
-# Input Convex Neural Networks and Deep-Q-Learning 
+# Partially Input Convex Neural Networks in Portfolio Optimization
 ## Project Structure
 ```bash
 ├───configs # .yml setup file for anaconda environment 
